@@ -23,12 +23,15 @@ import {
 } from "firebase/firestore";
 import { Plan, AppSettings } from "../types";
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyAI2wBXuR9V5OHr1fVNHJbNv0ReUqxjOww",
+  authDomain: "wadebicycle.firebaseapp.com",
+  projectId: "wadebicycle",
+  storageBucket: "wadebicycle.firebasestorage.app",
+  messagingSenderId: "365678601546",
+  appId: "1:365678601546:web:40c042ab0961b693ec0db3",
+  measurementId: "G-66ZD4J6QX3"
 };
 
 const app = initializeApp(firebaseConfig);
