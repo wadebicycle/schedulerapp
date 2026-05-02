@@ -24,14 +24,13 @@ import {
 import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAI2wBxUR9V5OHr1fVNHJbNv0ReUqxjOww"
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: "wadebicycle",
-  storageBucket: "wadebicycle.firebasestorage.app",
-  messagingSenderId: "365678601546",
-  appId: "1:365678601546:web:40c042ab0961b693ec0db3",
-  measurementId: "G-66ZD4J6QX3"
-};
+  apiKey: (import.meta.env.VITE_FIREBASE_API_KEY as string),
+    authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string),
+    projectId: "wadebicycle",
+    storageBucket: "wadebicycle.firebasestorage.app",
+    messagingSenderId: "365678601546",
+    appId: "1:365678601546:web:40c042ab0961b693ec0db3",
+    measurementId: "G-66ZD4J6QX3"
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
