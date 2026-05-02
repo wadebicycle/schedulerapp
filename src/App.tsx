@@ -598,31 +598,48 @@ export default function App() {
       {/* MAIN */}
       <main className="flex-1 overflow-auto p-3 md:p-6 lg:p-8">
         <div className="container mx-auto max-w-7xl">
-          <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div>
-                <h2 className={cn(
-                  "text-2xl font-black tracking-tight",
-                  settings.theme === 'dark' ? "text-white" : "text-slate-900"
+          <div className="mb-4 flex flex-row items-center justify-between gap-3">
+            <div>
+              <h2 className={cn(
+                "text-2xl font-black tracking-tight",
+                settings.theme === 'dark' ? "text-white" : "text-slate-900"
+              )}>
+                {t('weekOf')} {format(selectedWeekStart, 'w')}
+              </h2>
+              <p className={cn(
+                "text-sm font-medium",
+                settings.theme === 'dark' ? "text-slate-400" : "text-slate-500"
+              )}>
+                {t('fromTo', { 
+                  start: format(selectedWeekStart, 'd MMMM'),
+                  end: format(addWeeks(selectedWeekStart, 1), 'd MMMM, yyyy')
+                })}
+              </p>
+            </div>
+            {/* Right-side controls */}
+            <div className="flex items-center gap-3 shrink-0">
+              {completedPlansCount > 0 && (
+                <div className={cn(
+                  "p-3 rounded-xl border shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-right-4",
+                  settings.theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
                 )}>
-                  {t('weekOf')} {format(selectedWeekStart, 'w')}
-                </h2>
-                <p className={cn(
-                  "text-sm font-medium",
-                  settings.theme === 'dark' ? "text-slate-400" : "text-slate-500"
-                )}>
-                  {t('fromTo', { 
-                    start: format(selectedWeekStart, 'd MMMM'),
-                    end: format(addWeeks(selectedWeekStart, 1), 'd MMMM, yyyy')
-                  })}
-                </p>
-              </div>
+                  <div className="bg-yellow-500/10 p-2 rounded-full">
+                    <Trophy className="w-4 h-4 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('weeklyProgress')}</p>
+                    <p className={cn("text-sm font-medium", settings.theme === 'dark' ? "text-slate-200" : "text-slate-900")}>
+                      {completedPlansCount} {t('tasksCompleted')}
+                    </p>
+                  </div>
+                </div>
+              )}
               {/* Pomodoro toggle button */}
               <button
                 onClick={() => setIsPomodoroOpen(v => !v)}
                 title="Pomodoro Timer"
                 className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all",
+                  "flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all",
                   isPomodoroOpen
                     ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-200"
                     : (settings.theme === 'dark'
@@ -631,8 +648,8 @@ export default function App() {
                   pomodoroRunning && !isPomodoroOpen && "animate-pulse border-orange-400 text-orange-500"
                 )}
               >
-                <Timer className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Pomodoro</span>
+                <Timer className="w-4 h-4" />
+                <span>Pomodoro</span>
                 {pomodoroRunning && (
                   <span className={cn("font-mono text-[10px]", isPomodoroOpen ? "text-white/80" : "text-orange-500")}>
                     {String(Math.floor(pomodoroSecondsLeft / 60)).padStart(2,'0')}:{String(pomodoroSecondsLeft % 60).padStart(2,'0')}
@@ -645,23 +662,6 @@ export default function App() {
                 )}
               </button>
             </div>
-
-            {completedPlansCount > 0 && (
-              <div className={cn(
-                "p-3 rounded-xl border shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-right-4",
-                settings.theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-              )}>
-                <div className="bg-yellow-500/10 p-2 rounded-full">
-                  <Trophy className="w-4 h-4 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('weeklyProgress')}</p>
-                  <p className={cn("text-sm font-medium", settings.theme === 'dark' ? "text-slate-200" : "text-slate-900")}>
-                    {completedPlansCount} {t('tasksCompleted')}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Login prompt for guests */}
