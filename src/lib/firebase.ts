@@ -24,13 +24,13 @@ import {
 import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
-  apiKey: (import.meta.env.VITE_FIREBASE_API_KEY as string),
+  apiKey: "AIzaSyAI2wBXuR9V5OHr1fVNHJbNv0ReUqxjOww",
   authDomain: "://firebaseapp.com",
-    projectId: "wadebicycle",
-    storageBucket: "wadebicycle.firebasestorage.app",
-    messagingSenderId: "365678601546",
-    appId: "1:365678601546:web:40c042ab0961b693ec0db3",
-    measurementId: "G-66ZD4J6QX3"
+  projectId: "wadebicycle",
+  storageBucket: "wadebicycle.firebasestorage.app",
+  messagingSenderId: "365678601546",
+  appId: "1:365678601546:web:40c042ab0961b693ec0db3",
+  measurementId: "G-66ZD4J6QX3"
 };
 
 const app = initializeApp(firebaseConfig);
