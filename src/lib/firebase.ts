@@ -23,7 +23,6 @@ import {
 } from "firebase/firestore";
 import { Plan, AppSettings } from "../types";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAI2wBXuR9V5OHr1fVNHJbNv0ReUqxjOww",
   authDomain: "wadebicycle.firebaseapp.com",
