@@ -25,7 +25,7 @@ import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
   apiKey: (import.meta.env.VITE_FIREBASE_API_KEY as string),
-    authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN as string),
+  authDomain: "://firebaseapp.com",
     projectId: "wadebicycle",
     storageBucket: "wadebicycle.firebasestorage.app",
     messagingSenderId: "365678601546",
