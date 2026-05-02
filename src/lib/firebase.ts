@@ -24,7 +24,7 @@ import {
 import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
-  ,apiKey: "AIzaSyAI2wBxUR9V5OHr1fVNHJbNv0ReUqxjOww"
+  apiKey: "AIzaSyAI2wBxUR9V5OHr1fVNHJbNv0ReUqxjOww"
   authDomain: "wadebicycle.firebaseapp.com",
   projectId: "wadebicycle",
   storageBucket: "wadebicycle.firebasestorage.app",
