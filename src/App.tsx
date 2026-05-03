@@ -353,8 +353,16 @@ export default function App() {
           setSyncing(false);
         }
       } else {
-        // Guest: blank state only
-        setPlans([]);
+        // Guest: load from sessionStorage
+        const guestPlans = (() => {
+          try {
+            const data = sessionStorage.getItem('chronos_excel_plans');
+            return data ? JSON.parse(data) : [];
+          } catch (e) {
+            return [];
+          }
+        })();
+        setPlans(guestPlans);
         setWeekMetas({});
         setAuthAccountLabel('');
         setSettings({
@@ -704,7 +712,7 @@ export default function App() {
     } else if (qrUser) {
       await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
     } else {
-      storage.savePlans(nextPlans);
+      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
     }
     toast.success('Đã thêm công việc');
   };
@@ -717,7 +725,7 @@ export default function App() {
     } else if (qrUser) {
       await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
     } else {
-      storage.savePlans(nextPlans);
+      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
     }
     toast.success('Đã cập nhật công việc');
   };
@@ -730,7 +738,7 @@ export default function App() {
     } else if (qrUser) {
       await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
     } else {
-      storage.savePlans(nextPlans);
+      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
     }
     toast.info('Đã xóa công việc');
   };
