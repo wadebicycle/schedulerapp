@@ -451,6 +451,35 @@ export default function App() {
     }
   };
 
+  const handleDeleteCurrentAccountData = async () => {
+    if (!user) return;
+    const confirmed = window.confirm('Xóa toàn bộ dữ liệu của tài khoản đang đăng nhập?');
+    if (!confirmed) return;
+    try {
+      await cloudStorage.deleteAllPlans(user.uid).catch(console.error);
+      await cloudStorage.saveSettings(user.uid, {
+        language: 'en',
+        theme: 'light',
+        musicEnabled: false,
+        musicVolume: 0.3,
+        musicTrackId: 'lofi1',
+        customMusicDataUrl: '',
+        customMusicName: '',
+        notificationsEnabled: false,
+        notificationSound: 'bird',
+        startHour: 7,
+        endHour: 22,
+      }).catch(console.error);
+      setPlans([]);
+      setWeekMetas({});
+      setSettings(storage.getSettings(user.uid));
+      toast.success('Đã xóa dữ liệu tài khoản hiện tại');
+    } catch (e) {
+      console.error('Delete current account data failed', e);
+      toast.error('Không thể xóa dữ liệu');
+    }
+  };
+
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
@@ -638,6 +667,12 @@ export default function App() {
                   >
                     <LogOut className="w-4 h-4" />
                     {t('signOut')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={cn("gap-2 cursor-pointer text-red-500 focus:text-red-500", settings.theme === 'dark' ? "focus:bg-slate-700" : "")}
+                    onClick={handleDeleteCurrentAccountData}
+                  >
+                    Xóa dữ liệu
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
