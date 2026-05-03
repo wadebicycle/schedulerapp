@@ -238,6 +238,7 @@ export default function App() {
             ...storage.getSettings(firebaseUser.uid),
             ...cloudSettings,
           } as AppSettings);
+          setAuthStatus('signed-in');
         } catch (e) {
           console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
