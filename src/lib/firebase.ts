@@ -24,11 +24,11 @@ import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
-  authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
-    `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.web.app`,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || undefined,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  storageBucket: import.meta.env.VITE_FIREBASE_PROJECT_ID
+    ? `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`
+    : undefined,
   messagingSenderId: "365678601546",
   appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
   measurementId: "G-66ZD4J6QX3",
