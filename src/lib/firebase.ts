@@ -23,14 +23,14 @@ import {
 import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
+  apiKey: String(import.meta.env.VITE_FIREBASE_API_KEY || ""),
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "wadebicycle.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
+  projectId: String(import.meta.env.VITE_FIREBASE_PROJECT_ID || ""),
   storageBucket: import.meta.env.VITE_FIREBASE_PROJECT_ID
     ? `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`
     : undefined,
   messagingSenderId: "365678601546",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
+  appId: String(import.meta.env.VITE_FIREBASE_APP_ID || ""),
   measurementId: "G-66ZD4J6QX3",
 };
 
