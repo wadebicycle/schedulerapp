@@ -3,6 +3,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   browserLocalPersistence,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -57,7 +58,15 @@ provider.addScope("email");
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  await signInWithRedirect(auth, provider);
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e: any) {
+    if (e?.code === "auth/popup-blocked" || e?.code === "auth/popup-closed-by-user") {
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+    throw e;
+  }
 };
 
 export const resolveRedirectResult = () =>
