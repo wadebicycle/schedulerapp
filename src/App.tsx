@@ -217,7 +217,6 @@ export default function App() {
       if (firebaseUser) {
         setSyncing(true);
         try {
-          const localPlans = storage.getPlans(firebaseUser.uid);
           // Real-time subscription — Firestore is now the source of truth for plans
           let firstSnapshot = true;
           plansUnsubscribeRef.current = subscribePlans(
@@ -235,12 +234,6 @@ export default function App() {
               toast.error(t('syncError'));
             }
           );
-          if (localPlans.length > 0) {
-            const cloudPlans = await cloudStorage.getPlans(firebaseUser.uid);
-            if (cloudPlans.length === 0) {
-              await cloudStorage.savePlans(firebaseUser.uid, localPlans).catch(console.error);
-            }
-          }
           const [cloudWeekMetas, cloudSettings] = await Promise.all([
             cloudStorage.getWeekMetas(firebaseUser.uid),
             cloudStorage.getSettings(firebaseUser.uid),
