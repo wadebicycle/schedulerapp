@@ -47,6 +47,18 @@ provider.addScope("email");
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
+  const canUsePopup = typeof window !== "undefined" && window.innerWidth >= 768;
+  if (canUsePopup) {
+    try {
+      await signInWithPopup(auth, provider);
+      return;
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+      if (code && code !== "auth/popup-blocked" && code !== "auth/popup-closed-by-user") {
+        throw error;
+      }
+    }
+  }
   await signInWithRedirect(auth, provider);
 };
 
