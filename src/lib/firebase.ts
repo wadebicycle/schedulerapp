@@ -10,10 +10,7 @@ import {
   User,
 } from "firebase/auth";
 import {
-  initializeFirestore,
   getFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
   doc,
   setDoc,
   getDoc,
@@ -41,11 +38,7 @@ export const auth = getAuth(app);
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
 export const db = isFirstInit
-  ? initializeFirestore(app, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager(),
-      }),
-    })
+  ? getFirestore(app)
   : getFirestore(app);
 
 const provider = new GoogleAuthProvider();
