@@ -154,18 +154,18 @@ export function ScheduleGrid({
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingPlan) return;
     const planToSave = { ...editingPlan, title: newTitle, color: newColor, duration: newDuration, notes: newNotes || undefined };
     const wasGreen = plans.find(p => p.id === editingPlan.id)?.color === 'green';
     
     if (plans.some(p => p.id === planToSave.id)) {
-      onUpdatePlan(planToSave);
+      await onUpdatePlan(planToSave);
       if (!wasGreen && newColor === 'green') {
         onPlanTurnGreen?.(planToSave);
       }
     } else {
-      onAddPlan(planToSave);
+      await onAddPlan(planToSave);
       if (newColor === 'green') {
         onPlanTurnGreen?.(planToSave);
       }
