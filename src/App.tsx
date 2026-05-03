@@ -375,6 +375,10 @@ export default function App() {
       await signInWithGoogle();
     } catch (e: any) {
       console.error('Sign in failed', e?.code, e);
+      if (e?.message === 'POPUP_BLOCKED') {
+        toast.error('Trình duyệt đang chặn cửa sổ đăng nhập. Hãy bật popup hoặc mở app ở tab mới rồi thử lại.');
+        return;
+      }
       if (e?.code === 'auth/unauthorized-domain') {
         toast.error('Domain chưa được cấp phép trong Firebase Console. Vui lòng thêm domain này vào Authorized Domains.', { duration: 6000 });
       } else if (e?.code === 'auth/network-request-failed') {

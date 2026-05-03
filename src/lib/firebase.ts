@@ -3,7 +3,6 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
   getRedirectResult,
   signOut,
   onAuthStateChanged,
@@ -58,12 +57,9 @@ export const signInWithGoogle = async (): Promise<void> => {
     if (
       err.code === "auth/popup-blocked" ||
       err.code === "auth/popup-cancelled-by-user" ||
-      err.code === "auth/cancelled-popup-request" ||
-      err.code === "auth/operation-not-supported-in-this-environment"
+      err.code === "auth/cancelled-popup-request"
     ) {
-      await signInWithRedirect(auth, provider);
-    } else if (err?.code === "auth/unauthorized-domain") {
-      throw err;
+      throw new Error("POPUP_BLOCKED");
     } else {
       throw err;
     }
