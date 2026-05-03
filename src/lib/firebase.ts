@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   User,
@@ -48,6 +49,8 @@ provider.setCustomParameters({ prompt: "select_account" });
 export const signInWithGoogle = async (): Promise<void> => {
   await signInWithRedirect(auth, provider);
 };
+
+export const settleRedirectAuth = () => getRedirectResult(auth);
 
 export const signOutUser = () => signOut(auth);
 export const clearAuthState = async () => {
