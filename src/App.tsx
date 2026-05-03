@@ -638,21 +638,7 @@ export default function App() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  "gap-1.5 text-xs font-bold border-[#107C41] text-[#107C41] hover:bg-[#107C41] hover:text-white transition-colors h-8",
-                  settings.theme === 'dark' ? "bg-slate-800 border-[#107C41]" : ""
-                )}
-                onClick={handleSignIn}
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{t('signIn')}</span>
-                <span className="sm:hidden">Google</span>
-              </Button>
-            )}
+            ) : null}
 
             <Button 
               variant="ghost" 
@@ -1382,7 +1368,7 @@ export default function App() {
             <div className={cn("p-3 rounded-xl space-y-2", settings.theme === 'dark' ? "bg-slate-800" : "bg-slate-50")}>
               <Label className={cn("font-bold text-sm", settings.theme === 'dark' ? "text-slate-300" : "text-slate-700")}>Tài khoản</Label>
               {user ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <span className="w-8 h-8 rounded-full border-2 border-[#107C41] overflow-hidden bg-slate-200 shrink-0">
                     <img src={user.photoURL || ''} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   </span>
@@ -1390,7 +1376,7 @@ export default function App() {
                     <p className={cn("text-sm font-bold truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{authAccountLabel || user.displayName || user.email}</p>
                     <p className="text-xs text-slate-500 truncate">{user.email}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 text-xs h-7 shrink-0" onClick={handleSignOut}>
+                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 text-xs h-7 shrink-0 ml-auto" onClick={handleSignOut}>
                     <LogOut className="w-3 h-3 mr-1" />
                     {t('signOut')}
                   </Button>
