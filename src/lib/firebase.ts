@@ -4,7 +4,6 @@ import {
   GoogleAuthProvider,
   browserLocalPersistence,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -57,15 +56,7 @@ provider.setCustomParameters({
 });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (error: any) {
-    if (error?.code === "auth/popup-blocked" || error?.code === "auth/popup-closed-by-user") {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-    throw error;
-  }
+  await signInWithPopup(auth, provider);
 };
 
 export const signOutUser = () => signOut(auth);

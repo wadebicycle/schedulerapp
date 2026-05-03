@@ -141,6 +141,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = React.useState(true);
   const [syncing, setSyncing] = React.useState(false);
   const [authStatus, setAuthStatus] = React.useState<'loading' | 'guest' | 'signed-in'>('loading');
+  const [authError, setAuthError] = React.useState('');
   const [customUrlInput, setCustomUrlInput] = React.useState('');
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
@@ -385,10 +386,13 @@ export default function App() {
       toast.error('Không có kết nối internet. Đăng nhập cần có mạng.');
       return;
     }
+    setAuthError('');
     try {
       await signInWithGoogle();
     } catch (e: any) {
       console.error('Sign in failed', e?.code, e);
+      const code = e?.code || 'unknown';
+      setAuthError(code);
       if (e?.message === 'POPUP_BLOCKED') {
         toast.error('Trình duyệt đang chặn cửa sổ đăng nhập. Hãy bật popup hoặc mở app ở tab mới rồi thử lại.');
         return;
@@ -431,6 +435,7 @@ export default function App() {
     setPlans([]);
     setWeekMetas({});
     setAuthStatus('guest');
+    setAuthError('');
     toast.info('Đã reset phiên đăng nhập');
   };
 
@@ -595,6 +600,7 @@ export default function App() {
                     <p className="text-[10px] text-slate-400 mt-1">
                       {authStatus === 'signed-in' ? 'Firebase auth ok' : 'Auth pending'}
                     </p>
+                    {authError ? <p className="text-[10px] text-red-500 mt-1 truncate">Auth lỗi: {authError}</p> : null}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-xs text-[#107C41] font-medium gap-2 cursor-default">
@@ -770,6 +776,11 @@ export default function App() {
               </Button>
             </div>
           )}
+          {authError && !user && !authLoading ? (
+            <div className="mb-4 text-xs text-red-500">
+              Auth lỗi: {authError}. Hãy bấm Reset login rồi thử lại.
+            </div>
+          ) : null}
 
           {/* Schedule Grid */}
           <div className={cn(
