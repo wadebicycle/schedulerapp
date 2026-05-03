@@ -197,35 +197,40 @@ export default function App() {
       if (firebaseUser) {
         setSyncing(true);
         try {
-          // Migrate local plans → Firestore if Firestore is empty
-          const cloudPlans = await cloudStorage.getPlans(firebaseUser.uid);
-          if (cloudPlans.length === 0) {
-            const localPlans = storage.getPlans();
-            if (localPlans.length > 0) {
-              await cloudStorage.savePlans(firebaseUser.uid, localPlans);
-            }
-          }
-
-          // Load weekMetas + settings from Firestore
-          const [cloudWeekMetas, cloudSettings] = await Promise.all([
+          const [cloudPlans, cloudWeekMetas, cloudSettings] = await Promise.all([
+            cloudStorage.getPlans(firebaseUser.uid),
             cloudStorage.getWeekMetas(firebaseUser.uid),
             cloudStorage.getSettings(firebaseUser.uid),
           ]);
 
-          if (Object.keys(cloudWeekMetas).length > 0) {
-            setWeekMetas(cloudWeekMetas);
-          } else {
-            const localMetas = storage.getWeekMetas();
-            if (Object.keys(localMetas).length > 0) {
-              setWeekMetas(localMetas);
-              await cloudStorage.saveWeekMeta(firebaseUser.uid, 'migrated', {}).catch(() => {});
-            }
-          }
+          const localPlans = storage.getPlans();
+          const localWeekMetas = storage.getWeekMetas();
+          const localSettings = storage.getSettings();
 
-          if (Object.keys(cloudSettings).length > 0) {
-            const merged = { ...settings, ...cloudSettings };
-            setSettings(merged as AppSettings);
-            storage.saveSettings(merged);
+          const mergedPlans = cloudPlans.length > 0 ? cloudPlans : localPlans;
+          const mergedWeekMetas = Object.keys(cloudWeekMetas).length > 0 ? cloudWeekMetas : localWeekMetas;
+          const mergedSettings = {
+            ...localSettings,
+            ...cloudSettings,
+          } as AppSettings;
+
+          setPlans(mergedPlans);
+          setWeekMetas(mergedWeekMetas);
+          setSettings(mergedSettings);
+
+          const shouldSeedCloud = cloudPlans.length === 0 && localPlans.length > 0;
+          if (shouldSeedCloud) {
+            await cloudStorage.savePlans(firebaseUser.uid, localPlans);
+          }
+          if (Object.keys(cloudWeekMetas).length === 0 && Object.keys(localWeekMetas).length > 0) {
+            await Promise.all(
+              Object.entries(localWeekMetas).map(([weekStart, meta]) =>
+                cloudStorage.saveWeekMeta(firebaseUser.uid, weekStart, meta)
+              )
+            );
+          }
+          if (Object.keys(cloudSettings).length === 0) {
+            await cloudStorage.saveSettings(firebaseUser.uid, localSettings);
           }
 
           // Real-time subscription — Firestore is now the source of truth for plans
@@ -245,6 +250,10 @@ export default function App() {
               toast.error(t('syncError'));
             }
           );
+          setSyncing(false);
+          if (cloudPlans.length > 0) {
+            toast.success(t('dataSynced'));
+          }
         } catch (e) {
           console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
