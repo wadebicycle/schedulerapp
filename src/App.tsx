@@ -146,7 +146,9 @@ const HEALTH_TIPS = [
 ];
 
 function HealthTipCard({ theme }: { theme: Theme }) {
-  const tips = React.useMemo(() => {
+  const [tips, setTips] = React.useState<string[]>([]);
+
+  const pickTips = React.useCallback(() => {
     const first = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
     let second = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
     let guard = 0;
@@ -154,8 +156,14 @@ function HealthTipCard({ theme }: { theme: Theme }) {
       second = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
       guard += 1;
     }
-    return [first, second];
+    setTips([first, second]);
   }, []);
+
+  React.useEffect(() => {
+    pickTips();
+    const id = window.setInterval(pickTips, 10000);
+    return () => window.clearInterval(id);
+  }, [pickTips]);
 
   return (
     <Card className={cn(
