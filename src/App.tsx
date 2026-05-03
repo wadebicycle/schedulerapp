@@ -14,7 +14,7 @@ import {
 } from 'date-fns';
 import { Plan, NotificationSound } from './types';
 import { storage } from './lib/storage';
-import { signInWithGoogle, resolveRedirectResult, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
+import { auth, signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -188,15 +188,13 @@ export default function App() {
 
   // Auth listener
   React.useEffect(() => {
-    resolveRedirectResult().then((result) => {
-      if (result?.user) {
-        setAuthError('');
-        setAuthAccountLabel(result.user.displayName || result.user.email || '');
-      }
-    }).catch((e: any) => {
-      console.error('Redirect auth failed', e?.code, e);
-      setAuthError(e?.code || 'unknown');
-    });
+    const cachedUser = auth.currentUser;
+    if (cachedUser) {
+      setUser(cachedUser);
+      setAuthAccountLabel(cachedUser.displayName || cachedUser.email || '');
+      setAuthLoading(false);
+      setAuthStatus('signed-in');
+    }
     const unsubscribe = onAuthChanged(async (firebaseUser) => {
       // Tear down any existing plan subscription
       if (plansUnsubscribeRef.current) {
