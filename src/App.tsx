@@ -235,7 +235,7 @@ export default function App() {
             }
           );
         } catch (e) {
-          console.error('Cloud sync failed', e);
+      console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
           setPlans(storage.getPlans(firebaseUser.uid));
           setWeekMetas(storage.getWeekMetas(firebaseUser.uid));
@@ -397,14 +397,12 @@ export default function App() {
       console.error('Sign in failed', e?.code, e);
       const code = e?.code || 'unknown';
       setAuthError(code);
-      if (e?.code === 'auth/unauthorized-domain') {
-        toast.error('Domain chưa được cấp phép trong Firebase Console. Vui lòng thêm domain này vào Authorized Domains.', { duration: 6000 });
-      } else if (e?.code === 'auth/network-request-failed') {
+      if (e?.code === 'auth/network-request-failed') {
         toast.error('Lỗi mạng. Kiểm tra kết nối internet và thử lại.');
       } else if (e?.code === 'auth/user-cancelled') {
         toast.info('Đăng nhập bị huỷ.');
       } else {
-        toast.error('Đăng nhập thất bại.');
+        toast.error(`Đăng nhập thất bại: ${code}`);
       }
     }
   };
