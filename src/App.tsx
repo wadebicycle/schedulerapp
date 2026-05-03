@@ -142,6 +142,7 @@ export default function App() {
   const [syncing, setSyncing] = React.useState(false);
   const [authStatus, setAuthStatus] = React.useState<'loading' | 'guest' | 'signed-in'>('loading');
   const [authError, setAuthError] = React.useState('');
+  const [authAccountLabel, setAuthAccountLabel] = React.useState('');
   const [customUrlInput, setCustomUrlInput] = React.useState('');
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
@@ -190,6 +191,7 @@ export default function App() {
     resolveRedirectResult().then((result) => {
       if (result?.user) {
         setAuthError('');
+        setAuthAccountLabel(result.user.displayName || result.user.email || '');
       }
     }).catch((e: any) => {
       console.error('Redirect auth failed', e?.code, e);
@@ -203,6 +205,7 @@ export default function App() {
       }
 
       setUser(firebaseUser);
+      setAuthAccountLabel(firebaseUser?.displayName || firebaseUser?.email || '');
       setAuthLoading(false);
       setAuthStatus(firebaseUser ? 'signed-in' : 'guest');
 
@@ -246,6 +249,7 @@ export default function App() {
         // Guest: blank state only
         setPlans([]);
         setWeekMetas({});
+        setAuthAccountLabel('');
         setSettings(storage.getSettings(null));
         setSyncing(false);
       }
@@ -424,6 +428,7 @@ export default function App() {
     try {
       await signOutUser();
       setUser(null);
+      setAuthAccountLabel('');
       setPlans([]);
       setWeekMetas({});
       toast.info(t('signOut'));
@@ -590,10 +595,10 @@ export default function App() {
                 <DropdownMenuContent align="end" className={cn("w-56 border-none shadow-xl", settings.theme === 'dark' ? "bg-slate-800" : "bg-white")}>
                   <DropdownMenuLabel>
                     <p className="text-xs text-slate-500">{t('signedInAs')}</p>
-                    <p className={cn("font-bold text-sm truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{user.displayName}</p>
+                    <p className={cn("font-bold text-sm truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{authAccountLabel || user.displayName || user.email}</p>
                     <p className="text-xs text-slate-400 truncate">{user.email}</p>
                     <p className="text-[10px] text-slate-400 mt-1">
-                      {authStatus === 'signed-in' ? 'Firebase auth ok' : 'Auth pending'}
+                      {authStatus === 'signed-in' ? `Đã đăng nhập: ${authAccountLabel || user.email}` : 'Auth pending'}
                     </p>
                     {authError ? <p className="text-[10px] text-red-500 mt-1 truncate">Auth lỗi: {authError}</p> : null}
                   </DropdownMenuLabel>
@@ -1359,7 +1364,7 @@ export default function App() {
                 <div className="flex items-center gap-3">
                   <img src={user.photoURL || ''} alt="" className="w-8 h-8 rounded-full border-2 border-[#107C41]" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   <div className="flex-1 min-w-0">
-                    <p className={cn("text-sm font-bold truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{user.displayName}</p>
+                    <p className={cn("text-sm font-bold truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{authAccountLabel || user.displayName || user.email}</p>
                     <p className="text-xs text-slate-500 truncate">{user.email}</p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 text-xs h-7 shrink-0" onClick={handleSignOut}>
