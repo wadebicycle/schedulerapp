@@ -14,7 +14,7 @@ import {
 } from 'date-fns';
 import { Plan, NotificationSound } from './types';
 import { storage } from './lib/storage';
-import { signInWithGoogle, checkRedirectResult, signOutUser, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
+import { signInWithGoogle, signOutUser, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -247,17 +247,6 @@ export default function App() {
         plansUnsubscribeRef.current = null;
       }
     };
-  }, []);
-
-  // Handle Google redirect sign-in result (e.g. after popup was blocked)
-  React.useEffect(() => {
-    checkRedirectResult().then((result) => {
-      if (result?.user) {
-        setUser(result.user);
-      }
-    }).catch((e) => {
-      console.error('Redirect sign-in result error', e);
-    });
   }, []);
 
   // Online / offline detection

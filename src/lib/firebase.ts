@@ -2,9 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
-  getRedirectResult,
   signOut,
   onAuthStateChanged,
   User,
@@ -55,20 +53,8 @@ provider.setCustomParameters({
 });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  const host = window.location.hostname;
-  const isReplitPreview = host.includes(".replit.app") || host.includes(".replit.dev");
-  if (isReplitPreview) {
-    await signInWithRedirect(auth, provider);
-    return;
-  }
-  try {
-    await signInWithPopup(auth, provider);
-  } catch {
-    await signInWithRedirect(auth, provider);
-  }
+  await signInWithRedirect(auth, provider);
 };
-
-export const checkRedirectResult = () => getRedirectResult(auth);
 
 export const signOutUser = () => signOut(auth);
 export const onAuthChanged = (callback: (user: User | null) => void) =>
