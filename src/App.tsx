@@ -494,7 +494,7 @@ export default function App() {
   const handleQRLoginSuccess = (qrLoginUser: QRUser) => {
     saveQRUserToStorage(qrLoginUser);
     setQrUser(qrLoginUser);
-    setUser(null);
+    setUser({ uid: qrLoginUser.uid } as User);
     setAuthStatus('signed-in');
     setAuthAccountLabel(qrLoginUser.displayName || qrLoginUser.email || '');
     setIsQRModalOpen(false);
@@ -575,7 +575,8 @@ export default function App() {
     delete updatedMetas[weekStart].color;
     setWeekMetas(updatedMetas);
     if (user) {
-      await cloudStorage.saveWeekMeta(user.uid, weekStart, { color: undefined as any }).catch(console.error);
+      const { color, ...rest } = currentMeta;
+      await cloudStorage.saveWeekMeta(user.uid, weekStart, rest).catch(console.error);
     } else {
       return;
     }
