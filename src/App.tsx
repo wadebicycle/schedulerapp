@@ -14,7 +14,7 @@ import {
 } from 'date-fns';
 import { Plan, NotificationSound } from './types';
 import { storage } from './lib/storage';
-import { signInWithGoogle, checkRedirectResult, signOutUser, onAuthChanged, cloudStorage } from './lib/firebase';
+import { signInWithGoogle, checkRedirectResult, signOutUser, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -115,6 +115,7 @@ export default function App() {
   const [pomodoroSessions, setPomodoroSessions] = React.useState(0);
 
   const weekTabsContainerRef = React.useRef<HTMLDivElement>(null);
+  const plansUnsubscribeRef = React.useRef<(() => void) | null>(null);
 
   const [settings, setSettings] = React.useState<AppSettings>(() => storage.getSettings());
   const t = (key: keyof typeof translations.en, params: Record<string, string> = {}) => {
@@ -145,34 +146,41 @@ export default function App() {
   // Auth listener
   React.useEffect(() => {
     const unsubscribe = onAuthChanged(async (firebaseUser) => {
+      // Tear down any existing plan subscription
+      if (plansUnsubscribeRef.current) {
+        plansUnsubscribeRef.current();
+        plansUnsubscribeRef.current = null;
+      }
+
       setUser(firebaseUser);
       setAuthLoading(false);
 
       if (firebaseUser) {
         setSyncing(true);
         try {
-          const [cloudPlans, cloudWeekMetas, cloudSettings] = await Promise.all([
-            cloudStorage.getPlans(firebaseUser.uid),
-            cloudStorage.getWeekMetas(firebaseUser.uid),
-            cloudStorage.getSettings(firebaseUser.uid),
-          ]);
-
-          if (cloudPlans.length > 0) {
-            setPlans(cloudPlans);
-            storage.savePlans(cloudPlans);
-          } else {
+          // Migrate local plans → Firestore if Firestore is empty
+          const cloudPlans = await cloudStorage.getPlans(firebaseUser.uid);
+          if (cloudPlans.length === 0) {
             const localPlans = storage.getPlans();
             if (localPlans.length > 0) {
               await cloudStorage.savePlans(firebaseUser.uid, localPlans);
-              setPlans(localPlans);
             }
           }
+
+          // Load weekMetas + settings from Firestore
+          const [cloudWeekMetas, cloudSettings] = await Promise.all([
+            cloudStorage.getWeekMetas(firebaseUser.uid),
+            cloudStorage.getSettings(firebaseUser.uid),
+          ]);
 
           if (Object.keys(cloudWeekMetas).length > 0) {
             setWeekMetas(cloudWeekMetas);
           } else {
             const localMetas = storage.getWeekMetas();
-            setWeekMetas(localMetas);
+            if (Object.keys(localMetas).length > 0) {
+              setWeekMetas(localMetas);
+              await cloudStorage.saveWeekMeta(firebaseUser.uid, 'migrated', {}).catch(() => {});
+            }
           }
 
           if (Object.keys(cloudSettings).length > 0) {
@@ -181,21 +189,43 @@ export default function App() {
             storage.saveSettings(merged);
           }
 
-          toast.success(t('dataSynced'));
+          // Real-time subscription — Firestore is now the source of truth for plans
+          let firstSnapshot = true;
+          plansUnsubscribeRef.current = subscribePlans(
+            firebaseUser.uid,
+            (plans) => {
+              setPlans(plans);
+              if (firstSnapshot) {
+                firstSnapshot = false;
+                setSyncing(false);
+                toast.success(t('dataSynced'));
+              }
+            },
+            () => {
+              setSyncing(false);
+              toast.error(t('syncError'));
+            }
+          );
         } catch (e) {
           console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
           setPlans(storage.getPlans());
           setWeekMetas(storage.getWeekMetas());
-        } finally {
           setSyncing(false);
         }
       } else {
+        // Guest: use localStorage
         setPlans(storage.getPlans());
         setWeekMetas(storage.getWeekMetas());
       }
     });
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      if (plansUnsubscribeRef.current) {
+        plansUnsubscribeRef.current();
+        plansUnsubscribeRef.current = null;
+      }
+    };
   }, []);
 
   // Handle Google redirect sign-in result (e.g. after popup was blocked)
@@ -358,6 +388,10 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
+    if (plansUnsubscribeRef.current) {
+      plansUnsubscribeRef.current();
+      plansUnsubscribeRef.current = null;
+    }
     try {
       await signOutUser();
       setUser(null);
@@ -379,40 +413,46 @@ export default function App() {
   };
 
   const handleWeekMetaChange = async (weekStart: string, color: string) => {
-    storage.saveWeekMeta(weekStart, { color });
-    setWeekMetas(storage.getWeekMetas());
+    const updatedMetas = { ...weekMetas, [weekStart]: { ...(weekMetas[weekStart] || {}), color } };
+    setWeekMetas(updatedMetas);
     if (user) {
       await cloudStorage.saveWeekMeta(user.uid, weekStart, { color }).catch(console.error);
+    } else {
+      storage.saveWeekMeta(weekStart, { color });
     }
     toast.success('Đã cập nhật trạng thái tuần');
   };
 
   const handleAddPlan = async (plan: Plan) => {
-    const updatedPlans = [...plans, plan];
-    setPlans(updatedPlans);
-    storage.savePlans(updatedPlans);
     if (user) {
+      // Firestore is source of truth — onSnapshot will update state
       await cloudStorage.savePlan(user.uid, plan).catch(console.error);
+    } else {
+      const updatedPlans = [...plans, plan];
+      setPlans(updatedPlans);
+      storage.savePlans(updatedPlans);
     }
     toast.success('Đã thêm công việc');
   };
 
   const handleUpdatePlan = async (updatedPlan: Plan) => {
-    const updated = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
-    setPlans(updated);
-    storage.savePlans(updated);
     if (user) {
       await cloudStorage.savePlan(user.uid, updatedPlan).catch(console.error);
+    } else {
+      const updated = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
+      setPlans(updated);
+      storage.savePlans(updated);
     }
     toast.success('Đã cập nhật công việc');
   };
 
   const handleDeletePlan = async (id: string) => {
-    const updated = plans.filter(p => p.id !== id);
-    setPlans(updated);
-    storage.savePlans(updated);
     if (user) {
       await cloudStorage.deletePlan(user.uid, id).catch(console.error);
+    } else {
+      const updated = plans.filter(p => p.id !== id);
+      setPlans(updated);
+      storage.savePlans(updated);
     }
     toast.info('Đã xóa công việc');
   };

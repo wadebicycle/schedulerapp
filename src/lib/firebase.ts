@@ -20,6 +20,7 @@ import {
   getDocs,
   deleteDoc,
   writeBatch,
+  onSnapshot,
 } from "firebase/firestore";
 import { Plan, AppSettings } from "../types";
 
@@ -138,4 +139,23 @@ export const cloudStorage = {
     const existing = await cloudStorage.getSettings(uid);
     await setDoc(ref, { ...existing, ...settings });
   },
+};
+
+export const subscribePlans = (
+  uid: string,
+  callback: (plans: Plan[]) => void,
+  onError?: (e: Error) => void
+): (() => void) => {
+  const plansCol = collection(db, "users", uid, "plans");
+  return onSnapshot(
+    plansCol,
+    (snapshot) => {
+      const plans = snapshot.docs.map((d) => d.data() as Plan);
+      callback(plans);
+    },
+    (error) => {
+      console.error("Plans subscription error", error);
+      onError?.(error);
+    }
+  );
 };
