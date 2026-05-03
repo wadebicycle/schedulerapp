@@ -758,7 +758,7 @@ export default function App() {
           {/* Login prompt for guests */}
           {!user && !authLoading && (
             <div className={cn(
-              "mb-4 p-3 rounded-xl border flex items-center justify-between gap-3",
+              "mb-4 p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3",
               settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
             )}>
               <div className="flex items-center gap-2.5">
@@ -770,7 +770,7 @@ export default function App() {
                   <p className="text-[11px] text-slate-500">{t('loginToSync')}</p>
                 </div>
               </div>
-              <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-7 text-xs shrink-0" onClick={handleSignIn}>
+              <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-8 text-xs shrink-0 w-full sm:w-auto sm:ml-auto" onClick={handleSignIn}>
                 <LogIn className="w-3 h-3" />
                 {t('signIn')}
               </Button>
