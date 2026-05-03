@@ -142,7 +142,7 @@ export default function App() {
   const [authStatus, setAuthStatus] = React.useState<'loading' | 'guest' | 'signed-in'>('loading');
   const [authError, setAuthError] = React.useState('');
   const [authAccountLabel, setAuthAccountLabel] = React.useState('');
-  const [customUrlInput, setCustomUrlInput] = React.useState('');
+  const customMusicInputRef = React.useRef<HTMLInputElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
 
@@ -176,11 +176,11 @@ export default function App() {
 
   // All tracks = presets + custom (if set)
   const allTracks = React.useMemo(() => {
-    if (settings.customMusicUrl) {
-      return [...PRESET_TRACKS, { id: 'custom', name: '🎵 Custom', url: settings.customMusicUrl, isCustom: true }];
+    if (settings.customMusicDataUrl) {
+      return [...PRESET_TRACKS, { id: 'custom', name: settings.customMusicName || '🎵 Custom', url: settings.customMusicDataUrl, isCustom: true }];
     }
     return PRESET_TRACKS;
-  }, [settings.customMusicUrl]);
+  }, [settings.customMusicDataUrl, settings.customMusicName]);
 
   const currentTrack = allTracks.find(t => t.id === settings.musicTrackId) || PRESET_TRACKS[0];
   // Auth listener
@@ -269,7 +269,8 @@ export default function App() {
           musicEnabled: false,
           musicVolume: 0.3,
           musicTrackId: 'lofi1',
-          customMusicUrl: '',
+          customMusicDataUrl: '',
+          customMusicName: '',
           notificationsEnabled: false,
           notificationSound: 'bird',
           startHour: 7,
@@ -371,7 +372,7 @@ export default function App() {
     } else if (audioRef.current) {
       audioRef.current.pause();
     }
-  }, [settings.musicEnabled, settings.musicVolume, settings.musicTrackId, settings.customMusicUrl]);
+  }, [settings.musicEnabled, settings.musicVolume, settings.musicTrackId, settings.customMusicDataUrl]);
 
   // Notification checker — runs every minute
   React.useEffect(() => {
@@ -513,15 +514,27 @@ export default function App() {
     toast.info('Đã xóa công việc');
   };
 
-  const handleAddCustomMusic = () => {
-    if (!customUrlInput.trim()) return;
-    handleUpdateSettings({ customMusicUrl: customUrlInput.trim(), musicTrackId: 'custom', musicEnabled: true });
-    setCustomUrlInput('');
-    toast.success('Đã thêm nhạc tùy chỉnh');
+  const handleUploadCustomMusic = async (file?: File | null) => {
+    const selectedFile = file || customMusicInputRef.current?.files?.[0];
+    if (!selectedFile) return;
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(selectedFile);
+    });
+    handleUpdateSettings({
+      customMusicDataUrl: dataUrl,
+      customMusicName: selectedFile.name,
+      musicTrackId: 'custom',
+      musicEnabled: true,
+    });
+    if (customMusicInputRef.current) customMusicInputRef.current.value = '';
+    toast.success('Đã thêm nhạc từ thiết bị');
   };
 
   const handleRemoveCustomMusic = () => {
-    handleUpdateSettings({ customMusicUrl: '', musicTrackId: 'lofi1' });
+    handleUpdateSettings({ customMusicDataUrl: '', customMusicName: '', musicTrackId: 'lofi1' });
   };
 
   const navigateWeek = (direction: 'prev' | 'next') => {
@@ -1290,31 +1303,34 @@ export default function App() {
                 </div>
               )}
 
-              {/* Custom music URL */}
+              <input
+                ref={customMusicInputRef}
+                type="file"
+                accept="audio/*"
+                className="hidden"
+                onChange={(e) => void handleUploadCustomMusic(e.target.files?.[0])}
+              />
+              {/* Custom music upload */}
               <div>
                 <p className="text-[10px] text-slate-500 mb-1.5">{t('customMusic')}</p>
-                {settings.customMusicUrl ? (
+                {settings.customMusicDataUrl ? (
                   <div className="flex items-center gap-2">
                     <p className={cn("text-xs flex-1 truncate font-mono", settings.theme === 'dark' ? "text-slate-400" : "text-slate-500")}>
-                      {settings.customMusicUrl}
+                      {settings.customMusicName || 'Custom audio'}
                     </p>
                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-red-400 hover:text-red-500 shrink-0" onClick={handleRemoveCustomMusic}>
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      value={customUrlInput}
-                      onChange={(e) => setCustomUrlInput(e.target.value)}
-                      placeholder={t('customMusicPlaceholder')}
-                      className={cn("text-xs h-8 flex-1", settings.theme === 'dark' ? "bg-slate-700 border-slate-600 text-white" : "bg-white")}
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleAddCustomMusic(); }}
-                    />
-                    <Button onClick={handleAddCustomMusic} size="sm" className="h-8 w-8 p-0 bg-[#107C41] hover:bg-[#0d6435] text-white shrink-0">
-                      <Plus className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={() => customMusicInputRef.current?.click()}
+                    size="sm"
+                    className="h-8 w-full bg-[#107C41] hover:bg-[#0d6435] text-white gap-2"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {t('uploadMusic')}
+                  </Button>
                 )}
               </div>
             </div>

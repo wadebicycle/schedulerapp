@@ -34,7 +34,8 @@ export interface AppSettings {
   musicEnabled: boolean;
   musicVolume: number;
   musicTrackId: string;
-  customMusicUrl: string;
+  customMusicDataUrl: string;
+  customMusicName: string;
   notificationsEnabled: boolean;
   notificationSound: NotificationSound;
   startHour: number;
