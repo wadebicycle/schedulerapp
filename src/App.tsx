@@ -603,12 +603,14 @@ export default function App() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 rounded-full focus:outline-none">
-                    <img 
-                      src={user.photoURL || ''} 
-                      alt={user.displayName || 'User'}
-                      className="w-8 h-8 rounded-full border-2 border-[#107C41] object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
+                    <span className="w-8 h-8 rounded-full border-2 border-[#107C41] overflow-hidden bg-slate-200 shrink-0">
+                      <img 
+                        src={user.photoURL || ''} 
+                        alt={user.displayName || 'User'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    </span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className={cn("w-56 border-none shadow-xl", settings.theme === 'dark' ? "bg-slate-800" : "bg-white")}>
@@ -1381,7 +1383,9 @@ export default function App() {
               <Label className={cn("font-bold text-sm", settings.theme === 'dark' ? "text-slate-300" : "text-slate-700")}>Tài khoản</Label>
               {user ? (
                 <div className="flex items-center gap-3">
-                  <img src={user.photoURL || ''} alt="" className="w-8 h-8 rounded-full border-2 border-[#107C41]" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <span className="w-8 h-8 rounded-full border-2 border-[#107C41] overflow-hidden bg-slate-200 shrink-0">
+                    <img src={user.photoURL || ''} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  </span>
                   <div className="flex-1 min-w-0">
                     <p className={cn("text-sm font-bold truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{authAccountLabel || user.displayName || user.email}</p>
                     <p className="text-xs text-slate-500 truncate">{user.email}</p>
