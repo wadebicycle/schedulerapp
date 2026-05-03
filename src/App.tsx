@@ -140,6 +140,7 @@ export default function App() {
   const [user, setUser] = React.useState<User | null>(null);
   const [authLoading, setAuthLoading] = React.useState(true);
   const [syncing, setSyncing] = React.useState(false);
+  const [authStatus, setAuthStatus] = React.useState<'loading' | 'guest' | 'signed-in'>('loading');
   const [customUrlInput, setCustomUrlInput] = React.useState('');
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
@@ -193,6 +194,7 @@ export default function App() {
 
       setUser(firebaseUser);
       setAuthLoading(false);
+      setAuthStatus(firebaseUser ? 'signed-in' : 'guest');
 
       if (firebaseUser) {
         setSyncing(true);
@@ -581,6 +583,9 @@ export default function App() {
                     <p className="text-xs text-slate-500">{t('signedInAs')}</p>
                     <p className={cn("font-bold text-sm truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{user.displayName}</p>
                     <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {authStatus === 'signed-in' ? 'Firebase auth ok' : 'Auth pending'}
+                    </p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-xs text-[#107C41] font-medium gap-2 cursor-default">
