@@ -50,21 +50,21 @@ export const db = isFirstInit
 const provider = new GoogleAuthProvider();
 provider.addScope("profile");
 provider.addScope("email");
+provider.setCustomParameters({
+  prompt: "select_account",
+});
 
 export const signInWithGoogle = async (): Promise<void> => {
+  const host = window.location.hostname;
+  const isReplitPreview = host.includes(".replit.app") || host.includes(".replit.dev");
+  if (isReplitPreview) {
+    await signInWithRedirect(auth, provider);
+    return;
+  }
   try {
     await signInWithPopup(auth, provider);
-  } catch (err: any) {
-    if (
-      err.code === "auth/popup-blocked" ||
-      err.code === "auth/popup-cancelled-by-user" ||
-      err.code === "auth/cancelled-popup-request"
-    ) {
-      await signInWithRedirect(auth, provider);
-      return;
-    } else {
-      throw err;
-    }
+  } catch {
+    await signInWithRedirect(auth, provider);
   }
 };
 
