@@ -51,6 +51,8 @@ import {
   X,
   Timer,
   ScanLine,
+  BookMarked,
+  Heart,
   BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -169,53 +171,63 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
   }, [open, pickTips]);
 
   return (
-    <div className="w-full flex flex-col items-end gap-3">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
-          theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
-        )}
-        title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
-      >
-        <BookOpen className="w-4 h-4" />
-        <span className="text-sm font-medium">{open ? '×' : '+'}</span>
-      </button>
+    <div className="w-full flex justify-end">
+      <div className="relative w-full max-w-[22rem] md:max-w-[28rem]">
+        <div className="flex items-center justify-end mb-2 md:mb-0 md:w-fit">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className={cn(
+              "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border bg-white text-slate-900 border-slate-200 whitespace-nowrap",
+              theme === 'dark' && "bg-slate-900 text-white border-slate-700"
+            )}
+            title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
+          >
+            <span className="relative flex items-center justify-center w-4 h-4 shrink-0">
+              <BookMarked className="absolute inset-0 w-4 h-4" />
+              <Heart className="absolute inset-[2px] w-2.5 h-2.5 text-red-500 fill-red-500" />
+            </span>
+            <span className="text-sm font-medium">{open ? '×' : '+'}</span>
+          </button>
+        </div>
 
-      {open && (
-        <Card className={cn(
-          "mt-3 w-full max-w-[22rem] overflow-hidden border shadow-xl",
-          theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+        <div className={cn(
+          "md:absolute md:right-0 md:top-0 md:translate-x-full md:ml-4 md:z-30 transition-all duration-200 origin-top-right",
+          open ? "scale-100 opacity-100 pointer-events-auto" : "scale-95 opacity-0 pointer-events-none"
         )}>
-          <CardContent className="p-3 space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-                  Kiến thức bổ ích
-                </p>
-                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-                  Y tế ngắn gọn, dễ nhớ
-                </p>
-              </div>
-              <Badge variant="secondary" className="text-[10px]">Random</Badge>
-            </div>
-            <div className="space-y-1.5">
-              {tips.map((tip) => (
-                <div
-                  key={tip}
-                  className={cn(
-                    "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                    theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-                  )}
-                >
-                  {tip}
+          <Card className={cn(
+            "w-full md:w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden border shadow-xl",
+            theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+          )}>
+            <CardContent className="p-3 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
+                    Kiến thức bổ ích
+                  </p>
+                  <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
+                    Y tế ngắn gọn, dễ nhớ
+                  </p>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                <Badge variant="secondary" className="text-[10px]">Random</Badge>
+              </div>
+              <div className="space-y-1.5">
+                {tips.map((tip) => (
+                  <div
+                    key={tip}
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
+                      theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
+                    )}
+                  >
+                    {tip}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
