@@ -49,6 +49,7 @@ import {
   RotateCcw,
   X,
   Timer,
+  ScanLine,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -694,6 +695,19 @@ export default function App() {
               title={t('notificationsLabel')}
             >
               {settings.notificationsEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "rounded-full w-8 h-8 md:hidden",
+                settings.theme === 'dark' ? "text-slate-300 hover:text-white" : "text-slate-600"
+              )}
+              onClick={() => setIsQRModalOpen(true)}
+              title="Quét QR"
+            >
+              <ScanLine className="w-4 h-4" />
             </Button>
 
             {/* Auth button */}
