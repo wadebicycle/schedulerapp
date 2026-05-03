@@ -187,7 +187,11 @@ export default function App() {
 
   // Auth listener
   React.useEffect(() => {
-    resolveRedirectResult().catch((e: any) => {
+    resolveRedirectResult().then((result) => {
+      if (result?.user) {
+        setAuthError('');
+      }
+    }).catch((e: any) => {
       console.error('Redirect auth failed', e?.code, e);
       setAuthError(e?.code || 'unknown');
     });
@@ -235,7 +239,7 @@ export default function App() {
             }
           );
         } catch (e) {
-      console.error('Cloud sync failed', e);
+          console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
           setPlans(storage.getPlans(firebaseUser.uid));
           setWeekMetas(storage.getWeekMetas(firebaseUser.uid));
