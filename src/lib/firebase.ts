@@ -58,28 +58,7 @@ provider.addScope("email");
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  const isTouchDevice =
-    typeof window !== "undefined" &&
-    (window.matchMedia?.("(pointer: coarse)")?.matches || navigator.maxTouchPoints > 0);
-
-  if (isTouchDevice) {
-    await signInWithRedirect(auth, provider);
-    return;
-  }
-
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e: any) {
-    if (
-      e?.code === "auth/popup-blocked" ||
-      e?.code === "auth/cancelled-popup-request" ||
-      e?.code === "auth/popup-closed-by-user"
-    ) {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-    throw e;
-  }
+  await signInWithRedirect(auth, provider);
 };
 
 export const resolveRedirectResult = () =>
