@@ -258,6 +258,10 @@ export default function App() {
 
   const weekTabsContainerRef = React.useRef<HTMLDivElement>(null);
   const plansUnsubscribeRef = React.useRef<(() => void) | null>(null);
+  const wasOfflineRef = React.useRef(false);
+  const currentPlansRef = React.useRef<Plan[]>([]);
+  const currentUserRef = React.useRef<User | null>(null);
+  const currentQRUserRef = React.useRef<QRUser | null>(null);
 
   const [settings, setSettings] = React.useState<AppSettings>(() => storage.getSettings());
   const t = (key: keyof typeof translations.en, params: Record<string, string> = {}) => {
@@ -439,8 +443,26 @@ export default function App() {
 
   // Online / offline detection
   React.useEffect(() => {
-    const goOnline = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
+    const goOnline = async () => {
+      setIsOnline(true);
+      // Sync to Firestore when back online
+      if (wasOfflineRef.current) {
+        wasOfflineRef.current = false;
+        const currentUser = currentUserRef.current || currentQRUserRef.current;
+        if (currentUser && currentPlansRef.current.length > 0) {
+          try {
+            await cloudStorage.savePlans(currentUser.uid, currentPlansRef.current);
+            toast.success('Đã đồng bộ dữ liệu');
+          } catch (e) {
+            console.error('Failed to sync plans when back online', e);
+          }
+        }
+      }
+    };
+    const goOffline = () => {
+      setIsOnline(false);
+      wasOfflineRef.current = true;
+    };
     window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
     return () => {
@@ -494,6 +516,19 @@ export default function App() {
     const tabWidth = activeTab.clientWidth;
     container.scrollTo({ left: tabLeft - containerWidth / 2 + tabWidth / 2, behavior: 'smooth' });
   }, [selectedWeekStart]);
+
+  // Keep refs in sync with state
+  React.useEffect(() => {
+    currentPlansRef.current = plans;
+  }, [plans]);
+
+  React.useEffect(() => {
+    currentUserRef.current = user;
+  }, [user]);
+
+  React.useEffect(() => {
+    currentQRUserRef.current = qrUser;
+  }, [qrUser]);
 
   // Clock + theme
   React.useEffect(() => {
