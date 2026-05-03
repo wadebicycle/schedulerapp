@@ -70,7 +70,7 @@ export const signInWithGoogle = async (): Promise<void> => {
 };
 
 export const resolveRedirectResult = () =>
-  getRedirectResult(auth).catch(() => null);
+  getRedirectResult(auth);
 
 export const signOutUser = () => signOut(auth);
 export const clearAuthState = async () => {
