@@ -2,19 +2,14 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  browserLocalPersistence,
   signInWithPopup,
   signInWithRedirect,
   signOut,
   onAuthStateChanged,
-  setPersistence,
   User,
 } from "firebase/auth";
 import {
-  initializeFirestore,
   getFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
   doc,
   setDoc,
   getDoc,
@@ -40,16 +35,8 @@ const isNewApp = getApps().length === 0;
 const app = isNewApp ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
-setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-// Enable offline persistence on first init; use getFirestore on HMR reloads
-export const db = isNewApp
-  ? initializeFirestore(app, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager(),
-      }),
-    })
-  : getFirestore(app);
+export const db = getFirestore(app);
 
 const provider = new GoogleAuthProvider();
 provider.addScope("profile");
