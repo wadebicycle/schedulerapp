@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   browserLocalPersistence,
   signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -48,6 +49,8 @@ provider.setCustomParameters({
 export const signInWithGoogle = async (): Promise<void> => {
   await signInWithRedirect(auth, provider);
 };
+
+export const resolveRedirectResult = () => getRedirectResult(auth);
 
 export const signOutUser = () => signOut(auth);
 export const clearAuthState = async () => {

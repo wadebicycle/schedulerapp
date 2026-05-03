@@ -14,7 +14,7 @@ import {
 } from 'date-fns';
 import { Plan, NotificationSound } from './types';
 import { storage } from './lib/storage';
-import { signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
+import { signInWithGoogle, resolveRedirectResult, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -187,6 +187,10 @@ export default function App() {
 
   // Auth listener
   React.useEffect(() => {
+    resolveRedirectResult().catch((e: any) => {
+      console.error('Redirect auth failed', e?.code, e);
+      setAuthError(e?.code || 'unknown');
+    });
     const unsubscribe = onAuthChanged(async (firebaseUser) => {
       // Tear down any existing plan subscription
       if (plansUnsubscribeRef.current) {
@@ -419,20 +423,6 @@ export default function App() {
     } catch (e) {
       console.error('Sign out failed', e);
     }
-  };
-
-  const handleResetAuth = async () => {
-    if (plansUnsubscribeRef.current) {
-      plansUnsubscribeRef.current();
-      plansUnsubscribeRef.current = null;
-    }
-    await clearAuthState();
-    setUser(null);
-    setPlans([]);
-    setWeekMetas({});
-    setAuthStatus('guest');
-    setAuthError('');
-    toast.info('Đã đăng xuất máy tính này');
   };
 
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
