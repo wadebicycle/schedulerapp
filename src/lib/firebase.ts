@@ -49,18 +49,12 @@ provider.addScope("email");
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  const canUsePopup = typeof window !== "undefined" && window.innerWidth >= 768;
-  if (canUsePopup) {
-    try {
-      await signInWithPopup(auth, provider);
-      return;
-    } catch (error) {
-      const code = (error as { code?: string })?.code;
-      console.error("Popup auth failed", code, error);
-      if (code && code !== "auth/popup-blocked" && code !== "auth/popup-closed-by-user") {
-        throw error;
-      }
-    }
+  if (typeof window === "undefined") return;
+  const isDesktop = window.innerWidth >= 768;
+  if (isDesktop) {
+    const currentUrl = `${window.location.origin}/?qrSession=desktop`;
+    window.open(currentUrl, "_self");
+    return;
   }
   try {
     await signInWithRedirect(auth, provider);
