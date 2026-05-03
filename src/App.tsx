@@ -393,10 +393,6 @@ export default function App() {
       console.error('Sign in failed', e?.code, e);
       const code = e?.code || 'unknown';
       setAuthError(code);
-      if (e?.message === 'POPUP_BLOCKED') {
-        toast.error('Trình duyệt đang chặn cửa sổ đăng nhập. Hãy bật popup hoặc mở app ở tab mới rồi thử lại.');
-        return;
-      }
       if (e?.code === 'auth/unauthorized-domain') {
         toast.error('Domain chưa được cấp phép trong Firebase Console. Vui lòng thêm domain này vào Authorized Domains.', { duration: 6000 });
       } else if (e?.code === 'auth/network-request-failed') {
@@ -404,7 +400,7 @@ export default function App() {
       } else if (e?.code === 'auth/user-cancelled') {
         toast.info('Đăng nhập bị huỷ.');
       } else {
-        toast.error('Đăng nhập thất bại. Hãy thử lại hoặc mở app trong tab mới.');
+        toast.error('Đăng nhập thất bại.');
       }
     }
   };
@@ -769,11 +765,7 @@ export default function App() {
               </Button>
             </div>
           )}
-          {authError && !user && !authLoading ? (
-            <div className="mb-4 text-xs text-red-500">
-              Auth lỗi: {authError}. Hãy bấm Reset login rồi thử lại.
-            </div>
-          ) : null}
+          {authError && !user && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
 
           {/* Schedule Grid */}
           <div className={cn(

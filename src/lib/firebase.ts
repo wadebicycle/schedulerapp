@@ -3,7 +3,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   browserLocalPersistence,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -56,7 +56,7 @@ provider.setCustomParameters({
 });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  await signInWithPopup(auth, provider);
+  await signInWithRedirect(auth, provider);
 };
 
 export const signOutUser = () => signOut(auth);
