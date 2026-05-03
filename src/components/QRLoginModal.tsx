@@ -24,7 +24,7 @@ export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Pro
   const [phase, setPhase] = React.useState<Phase>("generating");
   const [sessionId, setSessionId] = React.useState<string>("");
   const [qrUrl, setQrUrl] = React.useState<string>("");
-  const [secondsLeft, setSecondsLeft] = React.useState(300);
+  const [secondsLeft, setSecondsLeft] = React.useState(180);
   const [scanStatus, setScanStatus] = React.useState<"idle" | "scanned" | "logging-in">("idle");
   const cleanupRef = React.useRef<(() => void) | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -35,7 +35,7 @@ export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Pro
     if (timerRef.current) clearInterval(timerRef.current);
 
     setPhase("generating");
-    setSecondsLeft(300);
+    setSecondsLeft(180);
     const id = generateSessionId();
     setSessionId(id);
 
@@ -68,7 +68,7 @@ export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Pro
           deleteQRSession(id).catch(() => {});
           requestAnimationFrame(() => {
             setScanStatus("logging-in");
-            setTimeout(() => onLoginSuccess(user), 600);
+            onLoginSuccess(user);
           });
         },
         () => {
@@ -91,7 +91,7 @@ export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Pro
           deleteQRSession(id).catch(() => {});
           requestAnimationFrame(() => {
             setScanStatus("logging-in");
-            setTimeout(() => onLoginSuccess(user), 600);
+            onLoginSuccess(user);
           });
         },
         () => {

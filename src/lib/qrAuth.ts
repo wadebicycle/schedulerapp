@@ -83,7 +83,7 @@ export function watchQRSession(
         });
       }
     } catch {}
-  }, 700);
+  }, 200);
 
   const unsub = onSnapshot(ref, (snap) => {
     if (!snap.exists()) return;
