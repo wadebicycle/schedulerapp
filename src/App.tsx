@@ -146,82 +146,67 @@ const HEALTH_TIPS = [
   'CT chi tiết hơn X-quang và hay dùng trong cấp cứu, nhưng có liều tia cao hơn.',
 ];
 
-function HealthTipPanel({ theme }: { theme: Theme }) {
+function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpen: boolean }) {
   const [open, setOpen] = React.useState(false);
-  const [tips, setTips] = React.useState<string[]>([]);
+  const [tip, setTip] = React.useState('');
 
-  const pickTips = React.useCallback(() => {
-    const first = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
-    let second = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
-    let guard = 0;
-    while (second === first && guard < 5) {
-      second = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
-      guard += 1;
-    }
-    setTips([first, second]);
+  const pickTip = React.useCallback(() => {
+    setTip(HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)]);
   }, []);
 
   React.useEffect(() => {
     if (!open) return;
-    pickTips();
-    const id = window.setInterval(pickTips, 10000);
+    pickTip();
+    const id = window.setInterval(pickTip, 10000);
     return () => window.clearInterval(id);
-  }, [open, pickTips]);
+  }, [open, pickTip]);
+
+  // Auto-close when settings open
+  React.useEffect(() => {
+    if (isSettingsOpen) setOpen(false);
+  }, [isSettingsOpen]);
 
   return (
-    <div className="w-full flex justify-end">
-      <div className="relative w-full max-w-[22rem] md:max-w-[28rem]">
-        <div className="flex items-center justify-end mb-2 md:mb-0">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className={cn(
-              "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
-              theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
-            )}
-            title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span className="text-sm font-medium">{open ? '×' : '+'}</span>
-          </button>
-        </div>
+    <div className="fixed bottom-28 right-3 md:bottom-auto md:top-24 md:right-6 z-40 w-auto">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className={cn(
+            "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
+            theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
+          )}
+          title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span className="text-sm font-medium">{open ? '×' : '+'}</span>
+        </button>
 
-        <div className={cn(
-          "absolute left-0 top-14 md:top-0 md:left-auto md:right-0 md:translate-x-full md:ml-4 z-[60] transition-all duration-200 origin-top-right",
-          open ? "scale-100 opacity-100 pointer-events-auto" : "scale-95 opacity-0 pointer-events-none"
-        )}>
+        {open && (
           <Card className={cn(
-            "w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden border shadow-xl",
+            "absolute bottom-full mb-2 right-0 md:left-0 w-[18rem] md:w-[24rem] border shadow-xl",
             theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
           )}>
             <CardContent className="p-3 space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-                    Kiến thức bổ ích
-                  </p>
-                  <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-                    Y tế ngắn gọn, dễ nhớ
-                  </p>
+              <div>
+                <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
+                  Kiến thức bổ ích
+                </p>
+                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
+                  Y tế ngắn gọn, dễ nhớ
+                </p>
+              </div>
+              {tip && (
+                <div className={cn(
+                  "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
+                  theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
+                )}>
+                  {tip}
                 </div>
-                <Badge variant="secondary" className="text-[10px]">Random</Badge>
-              </div>
-              <div className="space-y-1.5">
-                {tips.map((tip) => (
-                  <div
-                    key={tip}
-                    className={cn(
-                      "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                      theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-                    )}
-                  >
-                    {tip}
-                  </div>
-                ))}
-              </div>
+              )}
             </CardContent>
           </Card>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -1147,11 +1132,7 @@ export default function App() {
           )}
           {authError && !effectiveUser && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
 
-          <div className="flex justify-start md:justify-end mb-3">
-            <div className="w-full max-w-[22rem] md:max-w-[28rem] relative">
-              <HealthTipPanel theme={settings.theme} />
-            </div>
-          </div>
+          <HealthTipPanel theme={settings.theme} isSettingsOpen={isSettingsOpen} />
 
           {/* Schedule Grid */}
           <div className={cn(
