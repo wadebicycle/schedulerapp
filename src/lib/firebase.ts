@@ -26,7 +26,7 @@ const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
   authDomain:
     import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
-    `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+    `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.web.app`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
   messagingSenderId: "365678601546",
