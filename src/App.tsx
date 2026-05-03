@@ -481,6 +481,10 @@ export default function App() {
       console.error('Sign in failed', e?.code, e);
       const code = e?.code || 'unknown';
       setAuthError(code);
+      if (e?.message) {
+        toast.error(e.message);
+        return;
+      }
       if (e?.code === 'auth/network-request-failed') {
         toast.error('Lỗi mạng. Kiểm tra kết nối internet và thử lại.');
       } else if (e?.code === 'auth/unauthorized-domain') {
