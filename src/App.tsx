@@ -436,7 +436,7 @@ export default function App() {
     setWeekMetas({});
     setAuthStatus('guest');
     setAuthError('');
-    toast.info('Đã reset phiên đăng nhập');
+    toast.info('Đã đăng xuất máy tính này');
   };
 
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
@@ -571,9 +571,9 @@ export default function App() {
               size="sm"
               className="h-8 text-xs border-orange-400 text-orange-500 hover:bg-orange-50"
               onClick={handleResetAuth}
-              title="Reset login"
+              title="Đăng xuất máy tính"
             >
-              Reset login
+              Đăng xuất máy tính
             </Button>
 
             {/* Notification toggle quick button */}
