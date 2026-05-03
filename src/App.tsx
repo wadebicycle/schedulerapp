@@ -743,25 +743,30 @@ export default function App() {
     const nextPlans = [...plans, plan];
     setPlans(nextPlans);
     
+    console.log('[handleAddPlan] user:', user?.uid, 'qrUser:', qrUser?.uid, 'plan:', plan.id);
+    
     if (user) {
       try {
+        console.log('[handleAddPlan] Saving to Firebase with user:', user.uid);
         await cloudStorage.savePlan(user.uid, plan);
         toast.success('Đã thêm công việc');
       } catch (e: any) {
-        console.error('[App] Firebase save error:', e?.code, e?.message, e);
+        console.error('[handleAddPlan] Firebase save error:', e?.code, e?.message, e);
         toast.error(`Lỗi lưu công việc: ${e?.code || 'unknown error'}`);
         setPlans(plans);
       }
     } else if (qrUser) {
       try {
+        console.log('[handleAddPlan] Saving to Firebase with qrUser:', qrUser.uid);
         await cloudStorage.savePlan(qrUser.uid, plan);
         toast.success('Đã thêm công việc');
       } catch (e: any) {
-        console.error('[App] Firebase save error:', e?.code, e?.message, e);
+        console.error('[handleAddPlan] Firebase save error:', e?.code, e?.message, e);
         toast.error(`Lỗi lưu công việc: ${e?.code || 'unknown error'}`);
         setPlans(plans);
       }
     } else {
+      console.log('[handleAddPlan] No auth, using sessionStorage');
       sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
       toast.success('Đã thêm công việc (session)');
     }

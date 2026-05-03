@@ -81,7 +81,20 @@ export const cloudStorage = {
 
   savePlan: async (uid: string, plan: Plan): Promise<void> => {
     const planRef = doc(db, "users", uid, "plans", plan.id);
-    await setDoc(planRef, plan);
+    const cleanPlan = { ...plan, notes: plan.notes || undefined };
+    if (cleanPlan.notes === undefined) delete cleanPlan.notes;
+    
+    console.log('[Firebase] savePlan:', { uid, planId: plan.id, title: plan.title, path: `users/${uid}/plans/${plan.id}` });
+    try {
+      await setDoc(planRef, cleanPlan);
+      console.log('[Firebase] ✓ savePlan success');
+    } catch (e: any) {
+      console.error('[Firebase] ✗ savePlan FAILED:', {
+        code: e?.code,
+        message: e?.message
+      });
+      throw e;
+    }
   },
 
   savePlans: async (uid: string, plans: Plan[]): Promise<void> => {
