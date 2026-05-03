@@ -471,20 +471,21 @@ export default function App() {
   };
 
   const handleAddPlan = async (plan: Plan) => {
+    const nextPlans = [...plans, plan];
+    setPlans(nextPlans);
+    storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
-      // Firestore is source of truth — onSnapshot will update state
       await cloudStorage.savePlan(user.uid, plan).catch(console.error);
-    } else {
-      return;
     }
     toast.success('Đã thêm công việc');
   };
 
   const handleUpdatePlan = async (updatedPlan: Plan) => {
+    const nextPlans = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
+    setPlans(nextPlans);
+    storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
       await cloudStorage.savePlan(user.uid, updatedPlan).catch(console.error);
-    } else {
-      return;
     }
     toast.success('Đã cập nhật công việc');
   };
