@@ -51,3 +51,15 @@ Firebase project needs:
 - Google Sign-In enabled in Authentication
 - Firestore database enabled
 - Replit domain added to Authorized Domains
+
+## Version Control (GitHub)
+
+This project is configured for GitHub integration via Replit's Version Control panel.
+
+To connect to GitHub:
+1. Click the **Git icon** in the Replit left sidebar
+2. Authorize Replit to access your GitHub account (OAuth)
+3. Create a new GitHub repository or select an existing one
+4. Push the existing commits to the remote
+
+Once connected, you can push future changes directly from the Replit Version Control panel.
