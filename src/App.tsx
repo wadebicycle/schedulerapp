@@ -710,8 +710,10 @@ export default function App() {
     try {
       if (user) {
         await cloudStorage.savePlan(user.uid, plan);
+        storage.savePlans(nextPlans, user.uid);
       } else if (qrUser) {
         await cloudStorage.savePlan(qrUser.uid, plan);
+        storage.savePlans(nextPlans, qrUser.uid);
       } else {
         sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
       }
@@ -729,8 +731,10 @@ export default function App() {
     try {
       if (user) {
         await cloudStorage.savePlan(user.uid, updatedPlan);
+        storage.savePlans(nextPlans, user.uid);
       } else if (qrUser) {
         await cloudStorage.savePlan(qrUser.uid, updatedPlan);
+        storage.savePlans(nextPlans, qrUser.uid);
       } else {
         sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
       }
@@ -748,8 +752,10 @@ export default function App() {
     try {
       if (user) {
         await cloudStorage.deletePlan(user.uid, id);
+        storage.savePlans(nextPlans, user.uid);
       } else if (qrUser) {
         await cloudStorage.deletePlan(qrUser.uid, id);
+        storage.savePlans(nextPlans, qrUser.uid);
       } else {
         sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
       }
