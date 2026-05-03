@@ -566,6 +566,16 @@ export default function App() {
               </div>
             )}
 
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs border-orange-400 text-orange-500 hover:bg-orange-50"
+              onClick={handleResetAuth}
+              title="Reset login"
+            >
+              Reset login
+            </Button>
+
             {/* Notification toggle quick button */}
             <Button
               variant="ghost"
@@ -614,13 +624,6 @@ export default function App() {
                   >
                     <LogOut className="w-4 h-4" />
                     {t('signOut')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className={cn("gap-2 cursor-pointer text-orange-500 focus:text-orange-500", settings.theme === 'dark' ? "focus:bg-slate-700" : "")}
-                    onClick={handleResetAuth}
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Reset login
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
