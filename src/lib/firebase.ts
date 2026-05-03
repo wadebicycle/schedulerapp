@@ -44,15 +44,6 @@ provider.addScope("email");
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  const isTouchDevice =
-    typeof window !== "undefined" &&
-    (window.matchMedia?.("(pointer: coarse)")?.matches || navigator.maxTouchPoints > 0);
-
-  if (isTouchDevice) {
-    await signInWithPopup(auth, provider);
-    return;
-  }
-
   await signInWithRedirect(auth, provider);
 };
 
