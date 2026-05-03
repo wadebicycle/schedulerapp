@@ -169,7 +169,7 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
   }, [open, pickTips]);
 
   return (
-    <div className="fixed bottom-4 right-4 z-40">
+    <div className="w-full">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -185,7 +185,7 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
 
       {open && (
         <Card className={cn(
-          "mt-3 w-[min(92vw,22rem)] overflow-hidden border shadow-xl",
+          "mt-3 w-full max-w-[22rem] overflow-hidden border shadow-xl",
           theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
         )}>
           <CardContent className="p-3 space-y-2">
@@ -1037,6 +1037,12 @@ export default function App() {
             </div>
           )}
           {authError && !effectiveUser && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
+
+          <div className="flex justify-end mb-3">
+            <div className="w-full max-w-[22rem]">
+              <HealthTipPanel theme={settings.theme} />
+            </div>
+          </div>
 
           {/* Schedule Grid */}
           <div className={cn(
