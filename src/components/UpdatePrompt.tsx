@@ -3,16 +3,22 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { RefreshCw } from 'lucide-react';
 
 export function UpdatePrompt() {
-  const {
-    needRefresh: [needRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegistered(r) {
-      if (r) {
-        setInterval(() => r.update(), 60 * 1000);
-      }
-    },
-  });
+  let needRefresh = false;
+  let updateServiceWorker = (_reload?: boolean) => {};
+
+  try {
+    const result = useRegisterSW({
+      onRegistered(r) {
+        if (r) {
+          setInterval(() => r.update(), 60 * 1000);
+        }
+      },
+    });
+    needRefresh = result.needRefresh[0];
+    updateServiceWorker = result.updateServiceWorker;
+  } catch {
+    return null;
+  }
 
   if (!needRefresh) return null;
 

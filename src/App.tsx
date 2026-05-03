@@ -57,6 +57,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { translations } from './lib/i18n';
 import { AppSettings, Language, Theme } from './types';
+import { UpdatePrompt } from './components/UpdatePrompt';
 
 import { 
   Dialog,
@@ -1062,6 +1063,7 @@ export default function App() {
       </footer>
 
       <Toaster position="bottom-right" />
+      <UpdatePrompt />
 
       {/* POMODORO FLOATING PANEL */}
       {isPomodoroOpen && (() => {
