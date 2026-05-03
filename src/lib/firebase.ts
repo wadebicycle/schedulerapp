@@ -32,14 +32,11 @@ const firebaseConfig = {
   measurementId: "G-66ZD4J6QX3",
 };
 
-const isFirstInit = getApps().length === 0;
-const app = isFirstInit ? initializeApp(firebaseConfig) : getApp();
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-export const db = isFirstInit
-  ? getFirestore(app)
-  : getFirestore(app);
+export const db = getFirestore(app);
 
 const provider = new GoogleAuthProvider();
 provider.addScope("profile");
