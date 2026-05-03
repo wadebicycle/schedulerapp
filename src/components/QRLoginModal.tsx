@@ -13,13 +13,14 @@ import { cn } from "@/lib/utils";
 interface Props {
   open: boolean;
   theme: "light" | "dark";
+  user?: QRUser | null;
   onClose: () => void;
   onLoginSuccess: (user: QRUser) => void;
 }
 
 type Phase = "generating" | "waiting" | "approved" | "expired" | "error";
 
-export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
+export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Props) {
   const [phase, setPhase] = React.useState<Phase>("generating");
   const [sessionId, setSessionId] = React.useState<string>("");
   const [qrUrl, setQrUrl] = React.useState<string>("");
@@ -29,6 +30,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startSession = React.useCallback(async () => {
+    if (!user) return;
     cleanupRef.current?.();
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -100,7 +102,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         }
       );
     }
-  }, [onLoginSuccess]);
+  }, [onLoginSuccess, user]);
 
   React.useEffect(() => {
     if (open) startSession();

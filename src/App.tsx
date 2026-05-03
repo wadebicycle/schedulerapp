@@ -505,6 +505,14 @@ export default function App() {
     setAuthError('');
   };
 
+  const openQRLogin = () => {
+    if (effectiveUser) {
+      setIsQRScannerOpen(true);
+      return;
+    }
+    setIsQRModalOpen(true);
+  };
+
   const handleSignOut = async () => {
     if (plansUnsubscribeRef.current) {
       plansUnsubscribeRef.current();
@@ -736,13 +744,7 @@ export default function App() {
                 "rounded-full w-8 h-8 md:hidden",
                 settings.theme === 'dark' ? "text-slate-300 hover:text-white" : "text-slate-600"
               )}
-              onClick={() => {
-                if (effectiveUser) {
-                  setIsQRScannerOpen(true);
-                } else {
-                  setIsQRModalOpen(true);
-                }
-              }}
+              onClick={openQRLogin}
               title="Quét QR"
             >
               <ScanLine className="w-4 h-4" />
@@ -935,7 +937,7 @@ export default function App() {
                   size="sm"
                   variant="outline"
                   className={cn("gap-1.5 h-8 text-xs", settings.theme === 'dark' ? "border-slate-700 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50")}
-                  onClick={() => setIsQRModalOpen(true)}
+                  onClick={openQRLogin}
                 >
                   <span className="text-sm leading-none">⬜</span>
                   QR Login
@@ -1593,6 +1595,7 @@ export default function App() {
       <QRLoginModal
         open={isQRModalOpen}
         theme={settings.theme}
+        user={effectiveUser}
         onClose={() => setIsQRModalOpen(false)}
         onLoginSuccess={handleQRLoginSuccess}
       />
