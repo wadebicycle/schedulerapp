@@ -701,6 +701,10 @@ export default function App() {
     setPlans(nextPlans);
     if (user) {
       await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
+    } else if (qrUser) {
+      await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
+    } else {
+      storage.savePlans(nextPlans);
     }
     toast.success('Đã thêm công việc');
   };
@@ -710,6 +714,10 @@ export default function App() {
     setPlans(nextPlans);
     if (user) {
       await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
+    } else if (qrUser) {
+      await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
+    } else {
+      storage.savePlans(nextPlans);
     }
     toast.success('Đã cập nhật công việc');
   };
@@ -719,6 +727,10 @@ export default function App() {
     setPlans(nextPlans);
     if (user) {
       await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
+    } else if (qrUser) {
+      await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
+    } else {
+      storage.savePlans(nextPlans);
     }
     toast.info('Đã xóa công việc');
   };
