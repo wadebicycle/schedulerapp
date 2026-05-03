@@ -202,21 +202,12 @@ export default function App() {
             cloudStorage.getWeekMetas(firebaseUser.uid),
             cloudStorage.getSettings(firebaseUser.uid),
           ]);
-
-          const localPlans = storage.getPlans();
-          const localWeekMetas = storage.getWeekMetas();
-          const localSettings = storage.getSettings();
-
-          const mergedPlans = cloudPlans.length > 0 ? cloudPlans : localPlans;
-          const mergedWeekMetas = Object.keys(cloudWeekMetas).length > 0 ? cloudWeekMetas : localWeekMetas;
-          const mergedSettings = {
-            ...localSettings,
+          setPlans(cloudPlans);
+          setWeekMetas(cloudWeekMetas);
+          setSettings({
+            ...storage.getSettings(),
             ...cloudSettings,
-          } as AppSettings;
-
-          setPlans(mergedPlans);
-          setWeekMetas(mergedWeekMetas);
-          setSettings(mergedSettings);
+          } as AppSettings);
 
           // Real-time subscription — Firestore is now the source of truth for plans
           let firstSnapshot = true;
@@ -246,6 +237,7 @@ export default function App() {
         // Guest: use localStorage
         setPlans(storage.getPlans());
         setWeekMetas(storage.getWeekMetas());
+        setSettings(storage.getSettings());
       }
     });
     return () => {
