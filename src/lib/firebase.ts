@@ -11,7 +11,10 @@ import {
   User,
 } from "firebase/auth";
 import {
+  initializeFirestore,
   getFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   doc,
   setDoc,
   getDoc,
@@ -33,29 +36,36 @@ const firebaseConfig = {
   measurementId: "G-66ZD4J6QX3",
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const isNewApp = getApps().length === 0;
+const app = isNewApp ? initializeApp(firebaseConfig) : getApp();
+
 export const auth = getAuth(app);
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-export const db = getFirestore(app);
+// Enable offline persistence on first init; use getFirestore on HMR reloads
+export const db = isNewApp
+  ? initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    })
+  : getFirestore(app);
 
 const provider = new GoogleAuthProvider();
 provider.addScope("profile");
 provider.addScope("email");
-provider.setCustomParameters({
-  prompt: "select_account",
-});
+provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
   await signInWithRedirect(auth, provider);
 };
 
-export const resolveRedirectResult = () => getRedirectResult(auth);
+export const resolveRedirectResult = () =>
+  getRedirectResult(auth).catch(() => null);
 
 export const signOutUser = () => signOut(auth);
 export const clearAuthState = async () => {
   await signOut(auth).catch(() => {});
-  await setPersistence(auth, browserLocalPersistence).catch(() => {});
 };
 export const onAuthChanged = (callback: (user: User | null) => void) =>
   onAuthStateChanged(auth, callback);
