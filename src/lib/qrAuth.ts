@@ -32,6 +32,11 @@ export function generateSessionId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+export function isQRSessionUrl(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("qrSession");
+}
+
 export async function createQRSession(sessionId: string): Promise<void> {
   const ref = doc(db, "qrSessions", sessionId);
   await setDoc(ref, {

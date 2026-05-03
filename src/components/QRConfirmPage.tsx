@@ -8,11 +8,12 @@ interface Props {
   user: User;
   theme: "light" | "dark";
   onDone: () => void;
+  onOpenApp?: () => void;
 }
 
 type Phase = "idle" | "loading" | "success" | "error";
 
-export function QRConfirmPage({ sessionId, user, theme, onDone }: Props) {
+export function QRConfirmPage({ sessionId, user, theme, onDone, onOpenApp }: Props) {
   const [phase, setPhase] = React.useState<Phase>("idle");
   const isDark = theme === "dark";
 
@@ -103,6 +104,19 @@ export function QRConfirmPage({ sessionId, user, theme, onDone }: Props) {
               >
                 Huỷ
               </button>
+              {onOpenApp ? (
+                <button
+                  onClick={onOpenApp}
+                  className={cn(
+                    "w-full py-2 rounded-xl font-medium text-sm transition-colors",
+                    isDark
+                      ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  )}
+                >
+                  Mở app mới
+                </button>
+              ) : null}
             </div>
           </>
         )}

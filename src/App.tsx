@@ -17,7 +17,7 @@ import { storage } from './lib/storage';
 import { auth, signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans, settleRedirectAuth } from './lib/firebase';
 import { QRLoginModal } from './components/QRLoginModal';
 import { QRConfirmPage } from './components/QRConfirmPage';
-import { QRUser, saveQRUserToStorage, loadQRUserFromStorage, clearQRUserFromStorage } from './lib/qrAuth';
+import { QRUser, saveQRUserToStorage, loadQRUserFromStorage, clearQRUserFromStorage, isQRSessionUrl } from './lib/qrAuth';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -293,6 +293,12 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get('qrSession');
     if (sid) setQrSessionParam(sid);
+  }, []);
+
+  React.useEffect(() => {
+    if (isQRSessionUrl()) {
+      setIsQRModalOpen(false);
+    }
   }, []);
 
   // Load Firestore data for QR user (when no real Firebase user but qrUser exists)
@@ -1546,10 +1552,10 @@ export default function App() {
       />
 
       {/* QR Confirm Page (phone — when ?qrSession= detected in URL) */}
-      {qrSessionParam && user && (
+      {qrSessionParam && (
         <QRConfirmPage
           sessionId={qrSessionParam}
-          user={user}
+          user={(user || auth.currentUser) as User}
           theme={settings.theme}
           onDone={() => {
             setQrSessionParam(null);
@@ -1557,6 +1563,7 @@ export default function App() {
             url.searchParams.delete('qrSession');
             window.history.replaceState({}, '', url.toString());
           }}
+          onOpenApp={() => setIsQRModalOpen(true)}
         />
       )}
     </div>
