@@ -202,12 +202,6 @@ export default function App() {
       setAuthLoading(false);
       setAuthStatus('signed-in');
     }
-    const timer = window.setTimeout(() => {
-      setAuthLoading(false);
-      if (!auth.currentUser) {
-        setAuthStatus('guest');
-      }
-    }, 5000);
     const unsubscribe = onAuthChanged(async (firebaseUser) => {
       // Tear down any existing plan subscription
       if (plansUnsubscribeRef.current) {
@@ -285,7 +279,6 @@ export default function App() {
       }
     });
     return () => {
-      window.clearTimeout(timer);
       unsubscribe();
       if (plansUnsubscribeRef.current) {
         plansUnsubscribeRef.current();
