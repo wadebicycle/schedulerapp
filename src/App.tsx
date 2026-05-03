@@ -167,93 +167,46 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
   }, [isSettingsOpen]);
 
   return (
-    <>
-      {/* Desktop version: inline in right-side controls */}
-      <div className="relative hidden md:flex items-center">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className={cn(
-            "h-9 px-3 rounded-full shadow-sm flex items-center gap-2 border",
-            theme === 'dark' ? "bg-slate-800 text-white border-slate-700 hover:bg-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white"
-          )}
-          title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span className="text-xs font-medium">{open ? '×' : '+'}</span>
-        </button>
-
-        {open && (
-          <Card className={cn(
-            "absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[20rem] border shadow-xl z-50",
-            theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-          )}>
-            <CardContent className="p-3 space-y-2">
-              <div>
-                <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-                  Kiến thức bổ ích
-                </p>
-                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-                  Y tế ngắn gọn, dễ nhớ
-                </p>
-              </div>
-              {tip && (
-                <div className={cn(
-                  "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                  theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-                )}>
-                  {tip}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+    <div className="relative hidden md:flex items-center">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "h-9 px-3 rounded-full shadow-sm flex items-center gap-2 border",
+          theme === 'dark' ? "bg-slate-800 text-white border-slate-700 hover:bg-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white"
         )}
-      </div>
+        title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
+      >
+        <BookOpen className="w-4 h-4" />
+        <span className="text-xs font-medium">{open ? '×' : '+'}</span>
+      </button>
 
-      {/* Mobile version: fixed bottom-right */}
-      <div className="fixed bottom-20 right-3 z-40 md:hidden">
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className={cn(
-              "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
-              theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
+      {open && (
+        <Card className={cn(
+          "absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[20rem] border shadow-xl z-50",
+          theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+        )}>
+          <CardContent className="p-3 space-y-2">
+            <div>
+              <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
+                Kiến thức bổ ích
+              </p>
+              <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
+                Y tế ngắn gọn, dễ nhớ
+              </p>
+            </div>
+            {tip && (
+              <div className={cn(
+                "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
+                theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
+              )}>
+                {tip}
+              </div>
             )}
-            title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span className="text-sm font-medium">{open ? '×' : '+'}</span>
-          </button>
-
-          {open && (
-            <Card className={cn(
-              "absolute bottom-full mb-2 -left-20 w-[18rem] border shadow-xl",
-              theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-            )}>
-              <CardContent className="p-3 space-y-2">
-                <div>
-                  <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-                    Kiến thức bổ ích
-                  </p>
-                  <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-                    Y tế ngắn gọn, dễ nhớ
-                  </p>
-                </div>
-                {tip && (
-                  <div className={cn(
-                    "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                    theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-                  )}>
-                    {tip}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
-    </>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
 
@@ -285,9 +238,6 @@ export default function App() {
   const [pomodoroSecondsLeft, setPomodoroSecondsLeft] = React.useState(POMODORO_DURATIONS.work);
   const [pomodoroRunning, setPomodoroRunning] = React.useState(false);
   const [pomodoroSessions, setPomodoroSessions] = React.useState(0);
-  const [pomodoroPos, setPomodoroPos] = React.useState({ x: 16, y: 64 });
-  const pomodoroRef = React.useRef<HTMLDivElement>(null);
-  const pomoDragRef = React.useRef({ isDragging: false, startX: 0, startY: 0, offsetX: 0, offsetY: 0 });
 
   const weekTabsContainerRef = React.useRef<HTMLDivElement>(null);
   const plansUnsubscribeRef = React.useRef<(() => void) | null>(null);
@@ -1353,57 +1303,13 @@ export default function App() {
         const modeColor = pomodoroMode === 'work' ? '#f97316' : pomodoroMode === 'short' ? '#22c55e' : '#8b5cf6';
         const modeBg   = pomodoroMode === 'work' ? 'bg-orange-500' : pomodoroMode === 'short' ? 'bg-green-500' : 'bg-violet-500';
         const modeLabel = pomodoroMode === 'work' ? 'Tập trung' : pomodoroMode === 'short' ? 'Nghỉ ngắn' : 'Nghỉ dài';
-        
-        const handlePomoMouseDown = (e: React.MouseEvent) => {
-          const header = (e.target as HTMLElement).closest('[data-pomo-header]');
-          if (!header) return;
-          pomoDragRef.current = {
-            isDragging: true,
-            startX: e.clientX,
-            startY: e.clientY,
-            offsetX: pomodoroPos.x,
-            offsetY: pomodoroPos.y
-          };
-        };
-        
-        React.useEffect(() => {
-          if (!pomoDragRef.current.isDragging) return;
-          
-          const handleMouseMove = (e: MouseEvent) => {
-            const dx = e.clientX - pomoDragRef.current.startX;
-            const dy = e.clientY - pomoDragRef.current.startY;
-            setPomodoroPos({
-              x: pomoDragRef.current.offsetX + dx,
-              y: pomoDragRef.current.offsetY + dy
-            });
-          };
-          
-          const handleMouseUp = () => {
-            pomoDragRef.current.isDragging = false;
-          };
-          
-          window.addEventListener('mousemove', handleMouseMove);
-          window.addEventListener('mouseup', handleMouseUp);
-          return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-          };
-        }, []);
-        
         return (
-          <div 
-            ref={pomodoroRef}
-            className={cn(
-              "fixed z-50 w-64 rounded-2xl shadow-2xl border overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200",
-              settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
-            )}
-            style={{ left: `${pomodoroPos.x}px`, top: `${pomodoroPos.y}px` }}
-          >
+          <div className={cn(
+            "fixed bottom-16 left-4 z-50 w-64 rounded-2xl shadow-2xl border overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200",
+            settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
+          )}>
             {/* Header */}
-            <div 
-              data-pomo-header
-              onMouseDown={handlePomoMouseDown}
-              className={cn("flex items-center justify-between px-4 py-2.5 cursor-grab active:cursor-grabbing", modeBg)}>
+            <div className={cn("flex items-center justify-between px-4 py-2.5", modeBg)}>
               <div className="flex items-center gap-2 text-white">
                 <Timer className="w-3.5 h-3.5" />
                 <span className="text-xs font-black uppercase tracking-wide">Pomodoro</span>
