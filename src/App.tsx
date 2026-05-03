@@ -742,63 +742,78 @@ export default function App() {
   const handleAddPlan = async (plan: Plan) => {
     const nextPlans = [...plans, plan];
     setPlans(nextPlans);
-    try {
-      if (user) {
-        await cloudStorage.savePlan(user.uid, plan);
-        storage.savePlans(nextPlans, user.uid);
-      } else if (qrUser) {
-        await cloudStorage.savePlan(qrUser.uid, plan);
-        storage.savePlans(nextPlans, qrUser.uid);
-      } else {
-        sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
-      }
+    let hasError = false;
+    if (user) {
+      await cloudStorage.savePlan(user.uid, plan).catch((e) => {
+        console.error('Failed to save plan', e);
+        toast.error('Lỗi lưu công việc. Hãy thử lại');
+        setPlans(plans);
+        hasError = true;
+      });
+    } else if (qrUser) {
+      await cloudStorage.savePlan(qrUser.uid, plan).catch((e) => {
+        console.error('Failed to save plan', e);
+        toast.error('Lỗi lưu công việc. Hãy thử lại');
+        setPlans(plans);
+        hasError = true;
+      });
+    } else {
+      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+    }
+    if (!hasError) {
       toast.success('Đã thêm công việc');
-    } catch (e) {
-      console.error('Failed to save plan', e);
-      toast.error('Lỗi lưu công việc. Hãy thử lại');
-      setPlans(plans);
     }
   };
 
   const handleUpdatePlan = async (updatedPlan: Plan) => {
     const nextPlans = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
     setPlans(nextPlans);
-    try {
-      if (user) {
-        await cloudStorage.savePlan(user.uid, updatedPlan);
-        storage.savePlans(nextPlans, user.uid);
-      } else if (qrUser) {
-        await cloudStorage.savePlan(qrUser.uid, updatedPlan);
-        storage.savePlans(nextPlans, qrUser.uid);
-      } else {
-        sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
-      }
+    let hasError = false;
+    if (user) {
+      await cloudStorage.savePlan(user.uid, updatedPlan).catch((e) => {
+        console.error('Failed to update plan', e);
+        toast.error('Lỗi cập nhật công việc. Hãy thử lại');
+        setPlans(plans);
+        hasError = true;
+      });
+    } else if (qrUser) {
+      await cloudStorage.savePlan(qrUser.uid, updatedPlan).catch((e) => {
+        console.error('Failed to update plan', e);
+        toast.error('Lỗi cập nhật công việc. Hãy thử lại');
+        setPlans(plans);
+        hasError = true;
+      });
+    } else {
+      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+    }
+    if (!hasError) {
       toast.success('Đã cập nhật công việc');
-    } catch (e) {
-      console.error('Failed to update plan', e);
-      toast.error('Lỗi cập nhật công việc. Hãy thử lại');
-      setPlans(plans);
     }
   };
 
   const handleDeletePlan = async (id: string) => {
     const nextPlans = plans.filter(p => p.id !== id);
     setPlans(nextPlans);
-    try {
-      if (user) {
-        await cloudStorage.deletePlan(user.uid, id);
-        storage.savePlans(nextPlans, user.uid);
-      } else if (qrUser) {
-        await cloudStorage.deletePlan(qrUser.uid, id);
-        storage.savePlans(nextPlans, qrUser.uid);
-      } else {
-        sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
-      }
+    let hasError = false;
+    if (user) {
+      await cloudStorage.deletePlan(user.uid, id).catch((e) => {
+        console.error('Failed to delete plan', e);
+        toast.error('Lỗi xóa công việc. Hãy thử lại');
+        setPlans(plans);
+        hasError = true;
+      });
+    } else if (qrUser) {
+      await cloudStorage.deletePlan(qrUser.uid, id).catch((e) => {
+        console.error('Failed to delete plan', e);
+        toast.error('Lỗi xóa công việc. Hãy thử lại');
+        setPlans(plans);
+        hasError = true;
+      });
+    } else {
+      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+    }
+    if (!hasError) {
       toast.info('Đã xóa công việc');
-    } catch (e) {
-      console.error('Failed to delete plan', e);
-      toast.error('Lỗi xóa công việc. Hãy thử lại');
-      setPlans(plans);
     }
   };
 
