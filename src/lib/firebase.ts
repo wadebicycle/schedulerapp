@@ -25,13 +25,13 @@ import {
 import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
-  apiKey: (import.meta.env.VITE_FIREBASE_API_KEY as string),
-  authDomain: "://firebaseapp.com",
-    projectId: "wadebicycle",
-    storageBucket: "wadebicycle.firebasestorage.app",
-    messagingSenderId: "365678601546",
-    appId: "1:365678601546:web:40c042ab0961b693ec0db3",
-    measurementId: "G-66ZD4J6QX3"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string,
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID as string,
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  messagingSenderId: "365678601546",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID as string,
+  measurementId: "G-66ZD4J6QX3",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -54,9 +54,12 @@ export const signInWithGoogle = async (): Promise<void> => {
     if (
       err.code === "auth/popup-blocked" ||
       err.code === "auth/popup-cancelled-by-user" ||
-      err.code === "auth/cancelled-popup-request"
+      err.code === "auth/cancelled-popup-request" ||
+      err.code === "auth/operation-not-supported-in-this-environment"
     ) {
       await signInWithRedirect(auth, provider);
+    } else if (err?.code === "auth/unauthorized-domain") {
+      throw err;
     } else {
       throw err;
     }
