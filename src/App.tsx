@@ -566,6 +566,19 @@ export default function App() {
     toast.success('Đã cập nhật trạng thái tuần');
   };
 
+  const handleClearWeekColor = async (weekStart: string) => {
+    const currentMeta = weekMetas[weekStart] || {};
+    const updatedMetas = { ...weekMetas, [weekStart]: { ...currentMeta } };
+    delete updatedMetas[weekStart].color;
+    setWeekMetas(updatedMetas);
+    if (user) {
+      await cloudStorage.saveWeekMeta(user.uid, weekStart, { color: undefined as any }).catch(console.error);
+    } else {
+      return;
+    }
+    toast.success('Đã xóa màu tuần');
+  };
+
   const handleWeekNoteChange = async (weekStart: string, note: string) => {
     const updatedMetas = { ...weekMetas, [weekStart]: { ...(weekMetas[weekStart] || {}), note } };
     setWeekMetas(updatedMetas);
@@ -1035,6 +1048,19 @@ export default function App() {
                               />
                             ))}
                           </div>
+                          {meta?.color && (
+                            <button
+                              className={cn(
+                                "mt-2 w-full h-8 rounded-lg text-xs font-bold transition-colors",
+                                settings.theme === 'dark'
+                                  ? "bg-slate-700 text-slate-200 hover:bg-slate-600"
+                                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                              )}
+                              onClick={() => handleClearWeekColor(weekStart.toISOString())}
+                            >
+                              Xóa màu
+                            </button>
+                          )}
                         </div>
                         <div>
                           <p className={cn("text-[10px] font-bold uppercase mb-1.5", settings.theme === 'dark' ? "text-slate-500" : "text-slate-400")}>{t('weekNote')}</p>
