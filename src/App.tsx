@@ -1351,14 +1351,17 @@ export default function App() {
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    onClick={() => customMusicInputRef.current?.click()}
-                    size="sm"
-                    className="h-8 w-full bg-[#107C41] hover:bg-[#0d6435] text-white gap-2"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    {t('uploadMusic')}
-                  </Button>
+                  <div className="space-y-1.5">
+                    <Button
+                      onClick={() => customMusicInputRef.current?.click()}
+                      size="sm"
+                      className="h-8 w-full bg-[#107C41] hover:bg-[#0d6435] text-white gap-2"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {t('uploadMusic')}
+                    </Button>
+                    <p className="text-[10px] text-slate-500">{t('customMusicPlaceholder')}</p>
+                  </div>
                 )}
               </div>
             </div>
