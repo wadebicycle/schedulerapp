@@ -29,80 +29,56 @@ export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Pro
   const cleanupRef = React.useRef<(() => void) | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const buildQRUrl = React.useCallback((id: string) => {
+    const base = `${window.location.origin}${window.location.pathname}`;
+    return `${base}?qrSession=${id}`;
+  }, []);
+
   const startSession = React.useCallback(async () => {
     if (!user) return;
     cleanupRef.current?.();
     if (timerRef.current) clearInterval(timerRef.current);
 
-    setPhase("generating");
+    setPhase("waiting");
     setSecondsLeft(180);
     const id = generateSessionId();
     setSessionId(id);
+    setQrUrl(buildQRUrl(id));
+    setPhase("waiting");
 
-    const url = `${window.location.origin}${window.location.pathname}?qrSession=${id}`;
-    setQrUrl(url);
-
-    try {
-      timerRef.current = setInterval(() => {
-        setSecondsLeft((s) => {
-          if (s <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            setPhase("expired");
-            return 0;
-          }
-          return s - 1;
-        });
-      }, 1000);
-
-      createLocalQRSession(id);
-      await createQRSession(id);
-      setPhase("waiting");
-
-      cleanupRef.current = watchQRSession(
-        id,
-        (user) => {
-          if (timerRef.current) clearInterval(timerRef.current);
-          setPhase("approved");
-          setScanStatus("scanned");
-          setQrUrl("");
-          deleteQRSession(id).catch(() => {});
-          requestAnimationFrame(() => {
-            setScanStatus("logging-in");
-            onLoginSuccess(user);
-          });
-        },
-        () => {
+    timerRef.current = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("expired");
-          setQrUrl("");
-          deleteQRSession(id).catch(() => {});
+          return 0;
         }
-      );
-    } catch {
-      setPhase("waiting");
-      createLocalQRSession(id);
-      cleanupRef.current = watchQRSession(
-        id,
-        (user) => {
-          if (timerRef.current) clearInterval(timerRef.current);
-          setPhase("approved");
-          setScanStatus("scanned");
-          setQrUrl("");
-          deleteQRSession(id).catch(() => {});
-          requestAnimationFrame(() => {
-            setScanStatus("logging-in");
-            onLoginSuccess(user);
-          });
-        },
-        () => {
-          if (timerRef.current) clearInterval(timerRef.current);
-          setPhase("expired");
-          setQrUrl("");
-          deleteQRSession(id).catch(() => {});
-        }
-      );
-    }
-  }, [onLoginSuccess, user]);
+        return s - 1;
+      });
+    }, 1000);
+
+    createLocalQRSession(id);
+    cleanupRef.current = watchQRSession(
+      id,
+      (user) => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setPhase("approved");
+        setScanStatus("scanned");
+        setQrUrl("");
+        deleteQRSession(id).catch(() => {});
+        setScanStatus("logging-in");
+        onLoginSuccess(user);
+      },
+      () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setPhase("expired");
+        setQrUrl("");
+        deleteQRSession(id).catch(() => {});
+      }
+    );
+
+    createQRSession(id).catch(() => {});
+  }, [buildQRUrl, onLoginSuccess, user]);
 
   React.useEffect(() => {
     if (open) startSession();
@@ -149,13 +125,7 @@ export function QRLoginModal({ open, theme, user, onClose, onLoginSuccess }: Pro
           </p>
         </div>
 
-        {phase === "generating" && (
-          <div className="w-52 h-52 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-[#107C41] border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-
-        {(phase === "waiting" || phase === "generating") && qrUrl && (
+        {phase === "waiting" && qrUrl && (
           <>
             <div className={cn(
               "p-4 rounded-xl border-2",
