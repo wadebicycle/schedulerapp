@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   generateSessionId,
   createQRSession,
+  createLocalQRSession,
   watchQRSession,
   deleteQRSession,
   QRUser,
@@ -39,6 +40,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
     setQrUrl(url);
 
     try {
+      createLocalQRSession(id);
       await createQRSession(id);
       setPhase("waiting");
 
@@ -67,7 +69,22 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         }
       );
     } catch {
-      setPhase("error");
+      setPhase("waiting");
+      createLocalQRSession(id);
+      cleanupRef.current = watchQRSession(
+        id,
+        (user) => {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setPhase("approved");
+          deleteQRSession(id).catch(() => {});
+          setTimeout(() => onLoginSuccess(user), 800);
+        },
+        () => {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setPhase("expired");
+          deleteQRSession(id).catch(() => {});
+        }
+      );
     }
   }, [onLoginSuccess]);
 

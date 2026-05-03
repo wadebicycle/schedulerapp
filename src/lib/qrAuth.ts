@@ -26,6 +26,7 @@ export interface QRUser {
 
 const QR_SESSION_TTL_MS = 5 * 60 * 1000;
 const QR_STORAGE_KEY = "qr_user_session";
+const QR_LOCAL_PREFIX = "qr_session_";
 
 export function generateSessionId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -39,6 +40,16 @@ export async function createQRSession(sessionId: string): Promise<void> {
   });
 }
 
+export function createLocalQRSession(sessionId: string): void {
+  localStorage.setItem(
+    `${QR_LOCAL_PREFIX}${sessionId}`,
+    JSON.stringify({
+      status: "waiting",
+      createdAt: Date.now(),
+    })
+  );
+}
+
 export function watchQRSession(
   sessionId: string,
   onApproved: (user: QRUser) => void,
@@ -46,12 +57,31 @@ export function watchQRSession(
 ): () => void {
   const ref = doc(db, "qrSessions", sessionId);
   const timer = setTimeout(onExpired, QR_SESSION_TTL_MS);
+  const localTimer = setInterval(() => {
+    try {
+      const raw = localStorage.getItem(`${QR_LOCAL_PREFIX}${sessionId}`);
+      if (!raw) return;
+      const data = JSON.parse(raw) as QRSession;
+      if (data.status === "approved" && data.uid) {
+        clearTimeout(timer);
+        clearInterval(localTimer);
+        onApproved({
+          uid: data.uid,
+          displayName: data.displayName || null,
+          email: data.email || null,
+          photoURL: data.photoURL || null,
+          isQRLogin: true,
+        });
+      }
+    } catch {}
+  }, 700);
 
   const unsub = onSnapshot(ref, (snap) => {
     if (!snap.exists()) return;
     const data = snap.data() as QRSession;
     if (data.status === "approved" && data.uid) {
       clearTimeout(timer);
+      clearInterval(localTimer);
       onApproved({
         uid: data.uid,
         displayName: data.displayName || null,
@@ -64,6 +94,7 @@ export function watchQRSession(
 
   return () => {
     clearTimeout(timer);
+    clearInterval(localTimer);
     unsub();
   };
 }
@@ -73,18 +104,22 @@ export async function approveQRSession(
   user: { uid: string; displayName: string | null; email: string | null; photoURL: string | null }
 ): Promise<void> {
   const ref = doc(db, "qrSessions", sessionId);
-  await setDoc(ref, {
+  const payload = {
     status: "approved",
     uid: user.uid,
     displayName: user.displayName || "",
     email: user.email || "",
     photoURL: user.photoURL || "",
+  };
+  await setDoc(ref, payload).catch(() => {
+    localStorage.setItem(`${QR_LOCAL_PREFIX}${sessionId}`, JSON.stringify(payload));
   });
 }
 
 export async function deleteQRSession(sessionId: string): Promise<void> {
   const ref = doc(db, "qrSessions", sessionId);
   await deleteDoc(ref).catch(() => {});
+  localStorage.removeItem(`${QR_LOCAL_PREFIX}${sessionId}`);
 }
 
 export function saveQRUserToStorage(user: QRUser): void {
