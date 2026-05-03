@@ -187,7 +187,7 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
         </div>
 
         <div className={cn(
-          "absolute left-0 top-14 md:top-0 md:left-auto md:right-0 md:translate-x-full md:ml-4 z-30 transition-all duration-200 origin-top-right",
+          "absolute left-0 top-14 md:top-0 md:left-auto md:right-0 md:translate-x-full md:ml-4 z-[60] transition-all duration-200 origin-top-right",
           open ? "scale-100 opacity-100 pointer-events-auto" : "scale-95 opacity-0 pointer-events-none"
         )}>
           <Card className={cn(
@@ -1043,7 +1043,7 @@ export default function App() {
           {authError && !effectiveUser && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
 
           <div className="flex justify-start md:justify-end mb-3">
-            <div className="w-full max-w-[22rem] md:max-w-[28rem]">
+            <div className="w-full max-w-[22rem] md:max-w-[28rem] relative">
               <HealthTipPanel theme={settings.theme} />
             </div>
           </div>
