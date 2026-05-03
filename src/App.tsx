@@ -1392,7 +1392,7 @@ export default function App() {
                   </Button>
                 </div>
               ) : (
-                <Button className="w-full bg-[#107C41] hover:bg-[#0d6535] text-white gap-2 h-9 text-sm" onClick={() => { setIsSettingsOpen(false); handleSignIn(); }}>
+                <Button className="w-full bg-[#107C41] hover:bg-[#0d6535] text-white gap-2 h-9 text-sm" onClick={() => { setIsSettingsOpen(false); setTimeout(handleSignIn, 0); }}>
                   <LogIn className="w-4 h-4" />
                   {t('signIn')}
                 </Button>
