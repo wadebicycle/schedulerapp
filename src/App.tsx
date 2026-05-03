@@ -167,47 +167,45 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
   }, [isSettingsOpen]);
 
   return (
-    <div className="fixed bottom-28 right-3 md:bottom-auto md:top-24 md:right-6 z-40 w-auto">
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className={cn(
-            "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
-            theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
-          )}
-          title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span className="text-sm font-medium">{open ? '×' : '+'}</span>
-        </button>
-
-        {open && (
-          <Card className={cn(
-            "absolute bottom-full mb-2 right-0 md:left-0 w-[18rem] md:w-[24rem] border shadow-xl",
-            theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-          )}>
-            <CardContent className="p-3 space-y-2">
-              <div>
-                <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-                  Kiến thức bổ ích
-                </p>
-                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-                  Y tế ngắn gọn, dễ nhớ
-                </p>
-              </div>
-              {tip && (
-                <div className={cn(
-                  "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                  theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-                )}>
-                  {tip}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+    <div className="relative hidden md:flex items-center">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "h-9 px-3 rounded-full shadow-sm flex items-center gap-2 border",
+          theme === 'dark' ? "bg-slate-800 text-white border-slate-700 hover:bg-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white"
         )}
-      </div>
+        title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
+      >
+        <BookOpen className="w-4 h-4" />
+        <span className="text-xs font-medium">{open ? '×' : '+'}</span>
+      </button>
+
+      {open && (
+        <Card className={cn(
+          "absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[20rem] border shadow-xl z-50",
+          theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+        )}>
+          <CardContent className="p-3 space-y-2">
+            <div>
+              <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
+                Kiến thức bổ ích
+              </p>
+              <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
+                Y tế ngắn gọn, dễ nhớ
+              </p>
+            </div>
+            {tip && (
+              <div className={cn(
+                "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
+                theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
+              )}>
+                {tip}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
@@ -1068,6 +1066,7 @@ export default function App() {
                   </div>
                 </div>
               )}
+              <HealthTipPanel theme={settings.theme} isSettingsOpen={isSettingsOpen} />
               {/* Pomodoro toggle button */}
               <button
                 onClick={() => setIsPomodoroOpen(v => !v)}
@@ -1131,8 +1130,6 @@ export default function App() {
             </div>
           )}
           {authError && !effectiveUser && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
-
-          <HealthTipPanel theme={settings.theme} isSettingsOpen={isSettingsOpen} />
 
           {/* Schedule Grid */}
           <div className={cn(
