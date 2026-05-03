@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -76,6 +77,7 @@ export function ScheduleGrid({
   const [newTitle, setNewTitle] = React.useState('');
   const [newColor, setNewColor] = React.useState<PlanColor>('yellow');
   const [newDuration, setNewDuration] = React.useState(1);
+  const [newNotes, setNewNotes] = React.useState('');
 
   const daysOfCurrentWeek = React.useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
@@ -99,6 +101,7 @@ export function ScheduleGrid({
         setNewTitle(existing.title);
         setNewColor(existing.color);
         setNewDuration(existing.duration);
+        setNewNotes(existing.notes || '');
       } else {
         setEditingPlan({
           id: crypto.randomUUID(),
@@ -111,6 +114,7 @@ export function ScheduleGrid({
         setNewTitle('');
         setNewColor('yellow');
         setNewDuration(1);
+        setNewNotes('');
       }
       setIsDialogOpen(true);
       return;
@@ -146,12 +150,13 @@ export function ScheduleGrid({
     setNewTitle(plan.title);
     setNewColor(plan.color);
     setNewDuration(plan.duration);
+    setNewNotes(plan.notes || '');
     setIsDialogOpen(true);
   };
 
   const handleSave = () => {
     if (!editingPlan) return;
-    const planToSave = { ...editingPlan, title: newTitle, color: newColor, duration: newDuration };
+    const planToSave = { ...editingPlan, title: newTitle, color: newColor, duration: newDuration, notes: newNotes || undefined };
     const wasGreen = plans.find(p => p.id === editingPlan.id)?.color === 'green';
     
     if (plans.some(p => p.id === planToSave.id)) {
@@ -241,6 +246,9 @@ export function ScheduleGrid({
                         </span>
                         {plan.duration > 1 && (
                           <span className="text-[9px] opacity-50">{plan.duration}{t('hours_suffix')}</span>
+                        )}
+                        {plan.notes && (
+                          <span className="absolute top-0.5 left-0.5 w-1.5 h-1.5 rounded-full bg-current opacity-40" title={plan.notes} />
                         )}
                         <button 
                           onClick={(e) => handleOpenEdit(plan, e)}
@@ -334,6 +342,23 @@ export function ScheduleGrid({
                   />
                 ))}
               </div>
+            </div>
+
+            {/* Notes */}
+            <div className="grid grid-cols-4 items-start gap-3">
+              <Label className={cn("text-right text-xs font-bold pt-2", theme === 'dark' ? "text-slate-400" : "text-slate-600")}>
+                {t('notes')}
+              </Label>
+              <Textarea
+                value={newNotes}
+                onChange={(e) => setNewNotes(e.target.value)}
+                placeholder={t('notesPlaceholder')}
+                rows={2}
+                className={cn(
+                  "col-span-3 text-xs resize-none",
+                  theme === 'dark' ? "bg-slate-800 border-slate-700 text-white placeholder:text-slate-500" : "bg-slate-50 border-slate-200"
+                )}
+              />
             </div>
           </div>
           <DialogFooter className="flex justify-between w-full flex-row gap-2">

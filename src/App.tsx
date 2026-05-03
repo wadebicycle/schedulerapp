@@ -67,6 +67,7 @@ import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Select,
   SelectContent,
@@ -91,6 +92,44 @@ const MOTIVATIONAL = [
   'motivate4',
   'motivate5',
 ] as const;
+
+function WeekNoteEditor({ weekStart, initialNote, theme, placeholder, onSave }: {
+  weekStart: Date;
+  initialNote: string;
+  theme: Theme;
+  placeholder: string;
+  onSave: (note: string) => void;
+}) {
+  const [note, setNote] = React.useState(initialNote);
+  const [saved, setSaved] = React.useState(false);
+  React.useEffect(() => { setNote(initialNote); }, [weekStart.toISOString()]);
+  const handleSave = () => {
+    onSave(note);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+  return (
+    <div className="space-y-1.5">
+      <Textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder={placeholder}
+        rows={3}
+        className={cn(
+          "text-xs resize-none w-full",
+          theme === 'dark' ? "bg-slate-700 border-slate-600 text-white placeholder:text-slate-500" : "bg-slate-50 border-slate-200"
+        )}
+      />
+      <Button
+        size="sm"
+        className={cn("w-full h-6 text-[10px]", saved ? "bg-[#107C41]" : "bg-slate-500 hover:bg-slate-600")}
+        onClick={handleSave}
+      >
+        {saved ? '✓ Saved' : 'Save note'}
+      </Button>
+    </div>
+  );
+}
 
 export default function App() {
   const [plans, setPlans] = React.useState<Plan[]>([]);
@@ -425,6 +464,16 @@ export default function App() {
       storage.saveWeekMeta(weekStart, { color });
     }
     toast.success('Đã cập nhật trạng thái tuần');
+  };
+
+  const handleWeekNoteChange = async (weekStart: string, note: string) => {
+    const updatedMetas = { ...weekMetas, [weekStart]: { ...(weekMetas[weekStart] || {}), note } };
+    setWeekMetas(updatedMetas);
+    if (user) {
+      await cloudStorage.saveWeekMeta(user.uid, weekStart, { note }).catch(console.error);
+    } else {
+      storage.saveWeekMeta(weekStart, { note });
+    }
   };
 
   const handleAddPlan = async (plan: Plan) => {
@@ -824,17 +873,29 @@ export default function App() {
                           <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: meta.color }} />
                         )}
                       </PopoverTrigger>
-                      <PopoverContent className={cn("w-40 p-2 border-none shadow-xl", settings.theme === 'dark' ? "bg-slate-800" : "bg-white")}>
-                        <p className={cn("text-[10px] font-bold uppercase mb-2", settings.theme === 'dark' ? "text-slate-500" : "text-slate-400")}>{t('markWeek')}</p>
-                        <div className="grid grid-cols-4 gap-1">
-                          {['#FF0000', '#FFFF00', '#92D050', '#0070C0', '#7F7F7F', '#FFFFFF'].map(color => (
-                            <button
-                              key={color}
-                              className="w-full aspect-square rounded border border-slate-200"
-                              style={{ backgroundColor: color }}
-                              onClick={() => handleWeekMetaChange(weekStart.toISOString(), color)}
-                            />
-                          ))}
+                      <PopoverContent className={cn("w-48 p-3 border-none shadow-xl space-y-3", settings.theme === 'dark' ? "bg-slate-800" : "bg-white")}>
+                        <div>
+                          <p className={cn("text-[10px] font-bold uppercase mb-2", settings.theme === 'dark' ? "text-slate-500" : "text-slate-400")}>{t('markWeek')}</p>
+                          <div className="grid grid-cols-4 gap-1">
+                            {['#FF0000', '#FFFF00', '#92D050', '#0070C0', '#7F7F7F', '#FFFFFF'].map(color => (
+                              <button
+                                key={color}
+                                className="w-full aspect-square rounded border border-slate-200"
+                                style={{ backgroundColor: color }}
+                                onClick={() => handleWeekMetaChange(weekStart.toISOString(), color)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <p className={cn("text-[10px] font-bold uppercase mb-1.5", settings.theme === 'dark' ? "text-slate-500" : "text-slate-400")}>{t('weekNote')}</p>
+                          <WeekNoteEditor
+                            weekStart={weekStart}
+                            initialNote={weekMetas[weekStart.toISOString()]?.note || ''}
+                            theme={settings.theme}
+                            placeholder={t('weekNotePlaceholder')}
+                            onSave={(note) => handleWeekNoteChange(weekStart.toISOString(), note)}
+                          />
                         </div>
                       </PopoverContent>
                     </Popover>
@@ -1259,6 +1320,48 @@ export default function App() {
                     </Button>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Hour range */}
+            <div className={cn("p-3 rounded-xl space-y-3", settings.theme === 'dark' ? "bg-slate-800" : "bg-slate-50")}>
+              <Label className={cn("font-bold text-sm flex items-center gap-2", settings.theme === 'dark' ? "text-slate-300" : "text-slate-700")}>
+                <Clock className="w-3.5 h-3.5 text-[#107C41]" />
+                {t('hours')}
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] text-slate-500 mb-1">{t('startHour')}</p>
+                  <Select
+                    value={String(settings.startHour)}
+                    onValueChange={(v) => handleUpdateSettings({ startHour: Number(v) })}
+                  >
+                    <SelectTrigger className={cn("h-8 text-xs", settings.theme === 'dark' ? "bg-slate-700 border-slate-600 text-white" : "bg-white")}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) => i).map(h => (
+                        <SelectItem key={h} value={String(h)} className="text-xs">{h}:00</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 mb-1">{t('endHour')}</p>
+                  <Select
+                    value={String(settings.endHour)}
+                    onValueChange={(v) => handleUpdateSettings({ endHour: Number(v) })}
+                  >
+                    <SelectTrigger className={cn("h-8 text-xs", settings.theme === 'dark' ? "bg-slate-700 border-slate-600 text-white" : "bg-white")}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) => i).filter(h => h > settings.startHour).map(h => (
+                        <SelectItem key={h} value={String(h)} className="text-xs">{h}:00</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 

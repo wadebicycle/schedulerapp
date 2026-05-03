@@ -7,6 +7,7 @@ export interface Plan {
   startHour: number;
   duration: number;
   color: PlanColor;
+  notes?: string;
 }
 
 export interface WeekMetadata {
