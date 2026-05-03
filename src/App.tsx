@@ -35,7 +35,6 @@ import {
   LogIn,
   LogOut,
   CloudIcon,
-  HardDrive,
   Loader2,
   Bell,
   BellOff,
@@ -184,8 +183,6 @@ export default function App() {
   }, [settings.customMusicUrl]);
 
   const currentTrack = allTracks.find(t => t.id === settings.musicTrackId) || PRESET_TRACKS[0];
-  const currentStorageUid = user?.uid ?? null;
-
   // Auth listener
   React.useEffect(() => {
     const cachedUser = auth.currentUser;
@@ -262,7 +259,18 @@ export default function App() {
         setPlans([]);
         setWeekMetas({});
         setAuthAccountLabel('');
-        setSettings(storage.getSettings(null));
+        setSettings({
+          language: 'en',
+          theme: 'light',
+          musicEnabled: false,
+          musicVolume: 0.3,
+          musicTrackId: 'lofi1',
+          customMusicUrl: '',
+          notificationsEnabled: false,
+          notificationSound: 'bird',
+          startHour: 7,
+          endHour: 22,
+        });
         setSyncing(false);
       }
     });
@@ -457,9 +465,6 @@ export default function App() {
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
-    if (!user) {
-      storage.saveSettings(newSettings, currentStorageUid);
-    }
     if (user) {
       await cloudStorage.saveSettings(user.uid, newSettings).catch(console.error);
     }
@@ -489,7 +494,6 @@ export default function App() {
   const handleAddPlan = async (plan: Plan) => {
     const nextPlans = [...plans, plan];
     setPlans(nextPlans);
-    storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
       await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
     }
@@ -499,7 +503,6 @@ export default function App() {
   const handleUpdatePlan = async (updatedPlan: Plan) => {
     const nextPlans = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
     setPlans(nextPlans);
-    storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
       await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
     }
@@ -509,7 +512,6 @@ export default function App() {
   const handleDeletePlan = async (id: string) => {
     const nextPlans = plans.filter(p => p.id !== id);
     setPlans(nextPlans);
-    storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
       await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
     }
@@ -758,21 +760,21 @@ export default function App() {
           {/* Login prompt for guests */}
           {!user && !authLoading && (
             <div className={cn(
-              "mb-4 p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3",
+              "mb-4 p-3 rounded-xl border flex items-center justify-between gap-3",
               settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
             )}>
               <div className="flex items-center gap-2.5">
                 <div className="bg-blue-500/10 p-1.5 rounded-lg">
-                  <HardDrive className="w-3.5 h-3.5 text-blue-500" />
+                  <CloudIcon className="w-3.5 h-3.5 text-blue-500" />
                 </div>
                 <div>
-                  <p className={cn("text-xs font-bold", settings.theme === 'dark' ? "text-slate-200" : "text-slate-700")}>{t('localOnly')}</p>
-                  <p className="text-[11px] text-slate-500">{t('loginToSync')}</p>
+                  <p className={cn("text-xs font-bold", settings.theme === 'dark' ? "text-slate-200" : "text-slate-700")}>Online only</p>
+                  <p className="text-[11px] text-slate-500">Sign in to sync with your phone</p>
                 </div>
               </div>
-              <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-8 text-xs shrink-0 w-full sm:w-auto sm:ml-auto" onClick={handleSignIn}>
+              <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-8 text-xs shrink-0" onClick={handleSignIn}>
                 <LogIn className="w-3 h-3" />
-                {t('signIn')}
+                Sign in
               </Button>
             </div>
           )}
