@@ -192,28 +192,12 @@ export default function App() {
       setAuthLoading(false);
       setAuthStatus('signed-in');
     }
-    let settled = false;
     const timer = window.setTimeout(() => {
-      settled = true;
       setAuthLoading(false);
       if (!auth.currentUser) {
         setAuthStatus('guest');
       }
-    }, 2500);
-    const poll = window.setInterval(() => {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        settled = true;
-        setUser(currentUser);
-        setAuthAccountLabel(currentUser.displayName || currentUser.email || '');
-        setAuthLoading(false);
-        setAuthStatus('signed-in');
-        window.clearInterval(poll);
-        window.clearTimeout(timer);
-      } else if (settled) {
-        window.clearInterval(poll);
-      }
-    }, 100);
+    }, 5000);
     const unsubscribe = onAuthChanged(async (firebaseUser) => {
       // Tear down any existing plan subscription
       if (plansUnsubscribeRef.current) {
@@ -292,7 +276,6 @@ export default function App() {
     });
     return () => {
       window.clearTimeout(timer);
-      window.clearInterval(poll);
       unsubscribe();
       if (plansUnsubscribeRef.current) {
         plansUnsubscribeRef.current();
