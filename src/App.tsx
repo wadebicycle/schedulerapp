@@ -51,8 +51,6 @@ import {
   X,
   Timer,
   ScanLine,
-  BookMarked,
-  Heart,
   BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -172,21 +170,18 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
 
   return (
     <div className="w-full flex justify-end">
-      <div className="relative w-full max-w-[22rem] md:max-w-none md:w-fit">
-        <div className="flex items-center justify-end mb-2 md:mb-0 md:w-fit">
+      <div className="relative w-full max-w-[22rem]">
+        <div className="flex items-center justify-end mb-2">
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             className={cn(
-              "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border bg-white text-slate-900 border-slate-200 whitespace-nowrap",
-              theme === 'dark' && "bg-slate-900 text-white border-slate-700"
+              "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
+              theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
             )}
             title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
           >
-            <span className="relative flex items-center justify-center w-4 h-4 shrink-0">
-              <BookMarked className="absolute inset-0 w-4 h-4" />
-              <Heart className="absolute inset-[2px] w-2.5 h-2.5 text-red-500 fill-red-500" />
-            </span>
+            <BookOpen className="w-4 h-4" />
             <span className="text-sm font-medium">{open ? '×' : '+'}</span>
           </button>
         </div>
