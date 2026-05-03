@@ -156,21 +156,28 @@ export function ScheduleGrid({
 
   const handleSave = async () => {
     if (!editingPlan) return;
+    
     const planToSave = { ...editingPlan, title: newTitle, color: newColor, duration: newDuration, notes: newNotes || undefined };
     const wasGreen = plans.find(p => p.id === editingPlan.id)?.color === 'green';
+    const isNew = !plans.some(p => p.id === planToSave.id);
     
-    if (plans.some(p => p.id === planToSave.id)) {
-      await onUpdatePlan(planToSave);
-      if (!wasGreen && newColor === 'green') {
+    try {
+      if (isNew) {
+        await onAddPlan(planToSave);
+      } else {
+        await onUpdatePlan(planToSave);
+      }
+      
+      if (!isNew && !wasGreen && newColor === 'green') {
+        onPlanTurnGreen?.(planToSave);
+      } else if (isNew && newColor === 'green') {
         onPlanTurnGreen?.(planToSave);
       }
-    } else {
-      await onAddPlan(planToSave);
-      if (newColor === 'green') {
-        onPlanTurnGreen?.(planToSave);
-      }
+      
+      setIsDialogOpen(false);
+    } catch (e) {
+      console.error('Error saving plan:', e);
     }
-    setIsDialogOpen(false);
   };
 
   const handleDelete = () => {
