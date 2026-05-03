@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  browserSessionPersistence,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -61,7 +62,12 @@ export const signInWithGoogle = async (): Promise<void> => {
   try {
     await signInWithPopup(auth, provider);
   } catch (e: any) {
-    if (e?.code === "auth/popup-blocked" || e?.code === "auth/popup-closed-by-user") {
+    if (
+      e?.code === "auth/popup-blocked" ||
+      e?.code === "auth/popup-closed-by-user" ||
+      e?.code === "auth/cancelled-popup-request"
+    ) {
+      await setPersistence(auth, browserSessionPersistence).catch(() => {});
       await signInWithRedirect(auth, provider);
       return;
     }
