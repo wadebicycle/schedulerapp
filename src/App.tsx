@@ -185,7 +185,16 @@ export default function App() {
   const currentTrack = allTracks.find(t => t.id === settings.musicTrackId) || PRESET_TRACKS[0];
   // Auth listener
   React.useEffect(() => {
-    void settleRedirectAuth().catch(() => {});
+    void settleRedirectAuth()
+      .then((result) => {
+        if (result?.user) {
+          setUser(result.user);
+          setAuthAccountLabel(result.user.displayName || result.user.email || '');
+          setAuthLoading(false);
+          setAuthStatus('signed-in');
+        }
+      })
+      .catch(() => {});
     const cachedUser = auth.currentUser;
     if (cachedUser) {
       setUser(cachedUser);
