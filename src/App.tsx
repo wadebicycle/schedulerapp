@@ -262,7 +262,6 @@ export default function App() {
     checkRedirectResult().then((result) => {
       if (result?.user) {
         setUser(result.user);
-        window.location.reload();
       }
     }).catch((e) => {
       console.error('Redirect sign-in result error', e);
