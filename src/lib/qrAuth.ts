@@ -61,13 +61,17 @@ export function watchQRSession(
   onExpired: () => void
 ): () => void {
   const ref = doc(db, "qrSessions", sessionId);
-  const timer = setTimeout(onExpired, QR_SESSION_TTL_MS);
+  let approved = false;
+  const timer = setTimeout(() => {
+    if (!approved) onExpired();
+  }, QR_SESSION_TTL_MS);
   const localTimer = setInterval(() => {
     try {
       const raw = localStorage.getItem(`${QR_LOCAL_PREFIX}${sessionId}`);
       if (!raw) return;
       const data = JSON.parse(raw) as QRSession;
       if (data.status === "approved" && data.uid) {
+        approved = true;
         clearTimeout(timer);
         clearInterval(localTimer);
         onApproved({
@@ -85,6 +89,7 @@ export function watchQRSession(
     if (!snap.exists()) return;
     const data = snap.data() as QRSession;
     if (data.status === "approved" && data.uid) {
+      approved = true;
       clearTimeout(timer);
       clearInterval(localTimer);
       onApproved({
@@ -98,6 +103,7 @@ export function watchQRSession(
   });
 
   return () => {
+    approved = true;
     clearTimeout(timer);
     clearInterval(localTimer);
     unsub();

@@ -61,10 +61,13 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         (user) => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("approved");
-          setScanStatus("logging-in");
+          setScanStatus("scanned");
           setQrUrl("");
           deleteQRSession(id).catch(() => {});
-          setTimeout(() => onLoginSuccess(user), 350);
+          requestAnimationFrame(() => {
+            setScanStatus("logging-in");
+            setTimeout(() => onLoginSuccess(user), 600);
+          });
         },
         () => {
           if (timerRef.current) clearInterval(timerRef.current);
@@ -81,10 +84,13 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         (user) => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("approved");
-          setScanStatus("logging-in");
+          setScanStatus("scanned");
           setQrUrl("");
           deleteQRSession(id).catch(() => {});
-          setTimeout(() => onLoginSuccess(user), 350);
+          requestAnimationFrame(() => {
+            setScanStatus("logging-in");
+            setTimeout(() => onLoginSuccess(user), 600);
+          });
         },
         () => {
           if (timerRef.current) clearInterval(timerRef.current);
