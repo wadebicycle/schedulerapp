@@ -403,6 +403,8 @@ export default function App() {
       setAuthError(code);
       if (e?.code === 'auth/network-request-failed') {
         toast.error('Lỗi mạng. Kiểm tra kết nối internet và thử lại.');
+      } else if (e?.code === 'auth/unauthorized-domain') {
+        toast.error('Domain chưa được whitelist trong Firebase Authentication.');
       } else if (e?.code === 'auth/user-cancelled') {
         toast.info('Đăng nhập bị huỷ.');
       } else {
