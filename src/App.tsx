@@ -566,16 +566,6 @@ export default function App() {
               </div>
             )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 text-xs border-orange-400 text-orange-500 hover:bg-orange-50"
-              onClick={handleResetAuth}
-              title="Đăng xuất máy tính"
-            >
-              Đăng xuất máy tính
-            </Button>
-
             {/* Notification toggle quick button */}
             <Button
               variant="ghost"
