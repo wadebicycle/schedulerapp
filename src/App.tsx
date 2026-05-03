@@ -768,8 +768,8 @@ export default function App() {
                   <CloudIcon className="w-3.5 h-3.5 text-blue-500" />
                 </div>
                 <div>
-                  <p className={cn("text-xs font-bold", settings.theme === 'dark' ? "text-slate-200" : "text-slate-700")}>Online only</p>
-                  <p className="text-[11px] text-slate-500">Sign in to sync with your phone</p>
+                  <p className={cn("text-xs font-bold", settings.theme === 'dark' ? "text-slate-200" : "text-slate-700")}>Đăng nhập Google</p>
+                  <p className="text-[11px] text-slate-500">Đồng bộ với điện thoại và máy tính</p>
                 </div>
               </div>
               <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-8 text-xs shrink-0" onClick={handleSignIn}>
