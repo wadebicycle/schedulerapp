@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   signOut,
   onAuthStateChanged,
@@ -53,7 +54,15 @@ provider.setCustomParameters({
 });
 
 export const signInWithGoogle = async (): Promise<void> => {
-  await signInWithRedirect(auth, provider);
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error: any) {
+    if (error?.code === "auth/popup-blocked" || error?.code === "auth/popup-closed-by-user") {
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+    throw error;
+  }
 };
 
 export const signOutUser = () => signOut(auth);
