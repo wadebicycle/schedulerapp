@@ -408,6 +408,10 @@ export default function App() {
       toast.error('Không có kết nối internet. Đăng nhập cần có mạng.');
       return;
     }
+    setIsSettingsOpen(false);
+    setIsSummaryOpen(false);
+    setIsCalendarOpen(false);
+    setIsPomodoroOpen(false);
     setAuthError('');
     try {
       await signInWithGoogle();
