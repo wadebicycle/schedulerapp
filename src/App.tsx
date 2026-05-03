@@ -1565,7 +1565,6 @@ export default function App() {
             url.searchParams.delete('qrSession');
             window.history.replaceState({}, '', url.toString());
           }}
-          onOpenApp={() => setIsQRModalOpen(true)}
         />
       )}
     </div>

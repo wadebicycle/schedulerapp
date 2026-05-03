@@ -7,13 +7,12 @@ interface Props {
   sessionId: string;
   user: User;
   theme: "light" | "dark";
-  onDone: () => void;
-  onOpenApp?: () => void;
+  onDone?: () => void;
 }
 
 type Phase = "idle" | "loading" | "success" | "error";
 
-export function QRConfirmPage({ sessionId, user, theme, onDone, onOpenApp }: Props) {
+export function QRConfirmPage({ sessionId, user, theme, onDone }: Props) {
   const [phase, setPhase] = React.useState<Phase>("idle");
   const isDark = theme === "dark";
 
@@ -70,10 +69,6 @@ export function QRConfirmPage({ sessionId, user, theme, onDone, onOpenApp }: Pro
               </p>
             </div>
 
-            {phase === "error" && (
-              <p className="text-xs text-red-500 text-center">Lỗi. Thử lại.</p>
-            )}
-
             <div className="flex flex-col gap-2 w-full">
               <button
                 onClick={handleConfirm}
@@ -92,32 +87,24 @@ export function QRConfirmPage({ sessionId, user, theme, onDone, onOpenApp }: Pro
                   </span>
                 ) : "Xác nhận đăng nhập"}
               </button>
-              <button
-                onClick={onDone}
-                disabled={phase === "loading"}
-                className={cn(
-                  "w-full py-2 rounded-xl font-medium text-sm transition-colors",
-                  isDark
-                    ? "bg-slate-800 text-slate-400 hover:bg-slate-700"
-                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                )}
-              >
-                Huỷ
-              </button>
-              {onOpenApp ? (
+              {onDone ? (
                 <button
-                  onClick={onOpenApp}
+                  onClick={onDone}
+                  disabled={phase === "loading"}
                   className={cn(
                     "w-full py-2 rounded-xl font-medium text-sm transition-colors",
                     isDark
-                      ? "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      ? "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                   )}
                 >
-                  Mở app mới
+                  Huỷ
                 </button>
               ) : null}
             </div>
+            {phase === "error" && (
+              <p className="text-xs text-red-500 text-center">Lỗi. Thử lại.</p>
+            )}
           </>
         )}
       </div>
