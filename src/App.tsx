@@ -15,6 +15,9 @@ import {
 import { Plan, NotificationSound } from './types';
 import { storage } from './lib/storage';
 import { auth, signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans, settleRedirectAuth } from './lib/firebase';
+import { QRLoginModal } from './components/QRLoginModal';
+import { QRConfirmPage } from './components/QRConfirmPage';
+import { QRUser, saveQRUserToStorage, loadQRUserFromStorage, clearQRUserFromStorage } from './lib/qrAuth';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -142,6 +145,9 @@ export default function App() {
   const [authStatus, setAuthStatus] = React.useState<'loading' | 'guest' | 'signed-in'>('loading');
   const [authError, setAuthError] = React.useState('');
   const [authAccountLabel, setAuthAccountLabel] = React.useState('');
+  const [qrUser, setQrUser] = React.useState<QRUser | null>(() => loadQRUserFromStorage());
+  const [isQRModalOpen, setIsQRModalOpen] = React.useState(false);
+  const [qrSessionParam, setQrSessionParam] = React.useState<string | null>(null);
   const customMusicInputRef = React.useRef<HTMLInputElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
   const [isOnline, setIsOnline] = React.useState(navigator.onLine);
@@ -280,6 +286,47 @@ export default function App() {
       }
     };
   }, []);
+
+  // Detect ?qrSession= param on load (phone confirmation mode)
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get('qrSession');
+    if (sid) setQrSessionParam(sid);
+  }, []);
+
+  // Load Firestore data for QR user (when no real Firebase user but qrUser exists)
+  React.useEffect(() => {
+    if (user) return; // real auth takes priority
+    if (!qrUser) return;
+    setSyncing(true);
+    setAuthStatus('signed-in');
+    setAuthAccountLabel(qrUser.displayName || qrUser.email || '');
+    let firstSnapshot = true;
+    const unsub = subscribePlans(
+      qrUser.uid,
+      (plans) => {
+        setPlans(plans);
+        if (firstSnapshot) {
+          firstSnapshot = false;
+          setSyncing(false);
+          toast.success(t('dataSynced'));
+        }
+      },
+      () => {
+        setSyncing(false);
+        toast.error(t('syncError'));
+      }
+    );
+    Promise.all([
+      cloudStorage.getWeekMetas(qrUser.uid),
+      cloudStorage.getSettings(qrUser.uid),
+    ]).then(([metas, cloudSettings]) => {
+      setWeekMetas(metas);
+      setSettings((prev) => ({ ...prev, ...cloudSettings } as AppSettings));
+    }).catch(() => {});
+    plansUnsubscribeRef.current = unsub;
+    return () => { unsub(); };
+  }, [qrUser, user]);
 
   // Online / offline detection
   React.useEffect(() => {
@@ -434,17 +481,27 @@ export default function App() {
     }
   };
 
+  const handleQRLoginSuccess = (qrLoginUser: QRUser) => {
+    saveQRUserToStorage(qrLoginUser);
+    setQrUser(qrLoginUser);
+    setIsQRModalOpen(false);
+    setAuthError('');
+  };
+
   const handleSignOut = async () => {
     if (plansUnsubscribeRef.current) {
       plansUnsubscribeRef.current();
       plansUnsubscribeRef.current = null;
     }
     try {
-      await signOutUser();
+      if (user) await signOutUser();
       setUser(null);
+      setQrUser(null);
+      clearQRUserFromStorage();
       setAuthAccountLabel('');
       setPlans([]);
       setWeekMetas({});
+      setAuthStatus('guest');
       toast.info(t('signOut'));
     } catch (e) {
       console.error('Sign out failed', e);
@@ -567,6 +624,17 @@ export default function App() {
     setSelectedWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
   };
 
+  // Effective user: real Firebase user takes priority, then QR user
+  const effectiveUser = user ?? (qrUser
+    ? {
+        uid: qrUser.uid,
+        displayName: qrUser.displayName,
+        email: qrUser.email,
+        photoURL: qrUser.photoURL,
+        isQRLogin: true,
+      } as unknown as User
+    : null);
+
   const weekTabs = React.useMemo(() => {
     const today = startOfWeek(new Date(), { weekStartsOn: 1 });
     return Array.from({ length: 21 }, (_, i) => addWeeks(today, i - 10));
@@ -631,14 +699,14 @@ export default function App() {
             {/* Auth button */}
             {authLoading ? (
               <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-            ) : user ? (
+            ) : effectiveUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 rounded-full focus:outline-none min-w-8 min-h-8">
                     <span className="block w-8 h-8 rounded-full border-2 border-[#107C41] overflow-hidden bg-slate-200 shrink-0">
                       <img 
-                        src={user.photoURL || ''} 
-                        alt={user.displayName || 'User'}
+                        src={effectiveUser.photoURL || ''} 
+                        alt={effectiveUser.displayName || 'User'}
                         className="block w-full h-full object-cover"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
@@ -648,11 +716,11 @@ export default function App() {
                 <DropdownMenuContent align="end" className={cn("w-56 border-none shadow-xl", settings.theme === 'dark' ? "bg-slate-800" : "bg-white")}>
                   <DropdownMenuLabel>
                     <p className="text-xs text-slate-500">{t('signedInAs')}</p>
-                    <p className={cn("font-bold text-sm truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{authAccountLabel || user.displayName || user.email}</p>
-                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {authStatus === 'signed-in' ? `Đã đăng nhập: ${authAccountLabel || user.email}` : 'Auth pending'}
-                    </p>
+                    <p className={cn("font-bold text-sm truncate", settings.theme === 'dark' ? "text-white" : "text-slate-900")}>{authAccountLabel || effectiveUser.displayName || effectiveUser.email}</p>
+                    <p className="text-xs text-slate-400 truncate">{effectiveUser.email}</p>
+                    {qrUser && !user && (
+                      <p className="text-[10px] text-blue-500 mt-1">📱 Đăng nhập qua QR</p>
+                    )}
                     {authError ? <p className="text-[10px] text-red-500 mt-1 truncate">Auth lỗi: {authError}</p> : null}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -668,12 +736,14 @@ export default function App() {
                     <LogOut className="w-4 h-4" />
                     {t('signOut')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className={cn("gap-2 cursor-pointer text-red-500 focus:text-red-500", settings.theme === 'dark' ? "focus:bg-slate-700" : "")}
-                    onClick={handleDeleteCurrentAccountData}
-                  >
-                    Xóa dữ liệu
-                  </DropdownMenuItem>
+                  {user && (
+                    <DropdownMenuItem
+                      className={cn("gap-2 cursor-pointer text-red-500 focus:text-red-500", settings.theme === 'dark' ? "focus:bg-slate-700" : "")}
+                      onClick={handleDeleteCurrentAccountData}
+                    >
+                      Xóa dữ liệu
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : null}
@@ -794,9 +864,9 @@ export default function App() {
           </div>
 
           {/* Login prompt for guests */}
-          {!user && !authLoading && (
+          {!effectiveUser && !authLoading && (
             <div className={cn(
-              "mb-4 p-3 rounded-xl border flex items-center justify-between gap-3",
+              "mb-4 p-3 rounded-xl border flex items-center justify-between gap-3 flex-wrap",
               settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
             )}>
               <div className="flex items-center gap-2.5">
@@ -804,17 +874,28 @@ export default function App() {
                   <CloudIcon className="w-3.5 h-3.5 text-blue-500" />
                 </div>
                 <div>
-                  <p className={cn("text-xs font-bold", settings.theme === 'dark' ? "text-slate-200" : "text-slate-700")}>Đăng nhập Google</p>
-                  <p className="text-[11px] text-slate-500">Đồng bộ với điện thoại và máy tính</p>
+                  <p className={cn("text-xs font-bold", settings.theme === 'dark' ? "text-slate-200" : "text-slate-700")}>Đăng nhập để đồng bộ dữ liệu</p>
+                  <p className="text-[11px] text-slate-500">Google sign-in hoặc quét QR từ điện thoại</p>
                 </div>
               </div>
-              <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-8 text-xs shrink-0" onClick={handleSignIn}>
-                <LogIn className="w-3 h-3" />
-                Sign in
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className={cn("gap-1.5 h-8 text-xs", settings.theme === 'dark' ? "border-slate-700 text-slate-300 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50")}
+                  onClick={() => setIsQRModalOpen(true)}
+                >
+                  <span className="text-sm leading-none">⬜</span>
+                  QR Login
+                </Button>
+                <Button size="sm" className="bg-[#107C41] hover:bg-[#0d6535] text-white gap-1.5 h-8 text-xs shrink-0" onClick={handleSignIn}>
+                  <LogIn className="w-3 h-3" />
+                  Sign in
+                </Button>
+              </div>
             </div>
           )}
-          {authError && !user && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
+          {authError && !effectiveUser && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
 
           {/* Schedule Grid */}
           <div className={cn(
@@ -1441,6 +1522,29 @@ export default function App() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* QR Login Modal (desktop) */}
+      <QRLoginModal
+        open={isQRModalOpen}
+        theme={settings.theme}
+        onClose={() => setIsQRModalOpen(false)}
+        onLoginSuccess={handleQRLoginSuccess}
+      />
+
+      {/* QR Confirm Page (phone — when ?qrSession= detected in URL) */}
+      {qrSessionParam && user && (
+        <QRConfirmPage
+          sessionId={qrSessionParam}
+          user={user}
+          theme={settings.theme}
+          onDone={() => {
+            setQrSessionParam(null);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('qrSession');
+            window.history.replaceState({}, '', url.toString());
+          }}
+        />
+      )}
     </div>
   );
 }
