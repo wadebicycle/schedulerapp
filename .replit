@@ -5,6 +5,7 @@ channel = "stable-25_05"
 [agent]
 expertMode = true
 integrations = ["firebase_barebones_javascript:1.0.0"]
+stack = "BEST_EFFORT_FALLBACK"
 
 [workflows]
 runButton = "Project"
