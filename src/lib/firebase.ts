@@ -54,11 +54,7 @@ export const signInWithGoogle = async (): Promise<void> => {
   } catch (error) {
     const code = (error as { code?: string })?.code;
     console.error("Popup auth failed", code, error);
-    if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-    throw error;
+    await signInWithRedirect(auth, provider);
   }
 };
 
