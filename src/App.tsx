@@ -218,21 +218,6 @@ export default function App() {
           setWeekMetas(mergedWeekMetas);
           setSettings(mergedSettings);
 
-          const shouldSeedCloud = cloudPlans.length === 0 && localPlans.length > 0;
-          if (shouldSeedCloud) {
-            await cloudStorage.savePlans(firebaseUser.uid, localPlans);
-          }
-          if (Object.keys(cloudWeekMetas).length === 0 && Object.keys(localWeekMetas).length > 0) {
-            await Promise.all(
-              Object.entries(localWeekMetas).map(([weekStart, meta]) =>
-                cloudStorage.saveWeekMeta(firebaseUser.uid, weekStart, meta)
-              )
-            );
-          }
-          if (Object.keys(cloudSettings).length === 0) {
-            await cloudStorage.saveSettings(firebaseUser.uid, localSettings);
-          }
-
           // Real-time subscription — Firestore is now the source of truth for plans
           let firstSnapshot = true;
           plansUnsubscribeRef.current = subscribePlans(
@@ -250,10 +235,6 @@ export default function App() {
               toast.error(t('syncError'));
             }
           );
-          setSyncing(false);
-          if (cloudPlans.length > 0) {
-            toast.success(t('dataSynced'));
-          }
         } catch (e) {
           console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
@@ -281,6 +262,7 @@ export default function App() {
     checkRedirectResult().then((result) => {
       if (result?.user) {
         setUser(result.user);
+        window.location.reload();
       }
     }).catch((e) => {
       console.error('Redirect sign-in result error', e);
