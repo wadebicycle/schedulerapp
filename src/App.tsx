@@ -182,6 +182,7 @@ export default function App() {
   }, [settings.customMusicUrl]);
 
   const currentTrack = allTracks.find(t => t.id === settings.musicTrackId) || PRESET_TRACKS[0];
+  const currentStorageUid = user?.uid ?? null;
 
   // Auth listener
   React.useEffect(() => {
@@ -207,7 +208,7 @@ export default function App() {
           setPlans(cloudPlans);
           setWeekMetas(cloudWeekMetas);
           setSettings({
-            ...storage.getSettings(),
+            ...storage.getSettings(firebaseUser.uid),
             ...cloudSettings,
           } as AppSettings);
 
@@ -231,15 +232,15 @@ export default function App() {
         } catch (e) {
           console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
-          setPlans(storage.getPlans());
-          setWeekMetas(storage.getWeekMetas());
+          setPlans(storage.getPlans(firebaseUser.uid));
+          setWeekMetas(storage.getWeekMetas(firebaseUser.uid));
           setSyncing(false);
         }
       } else {
         // Guest: use localStorage
-        setPlans(storage.getPlans());
-        setWeekMetas(storage.getWeekMetas());
-        setSettings(storage.getSettings());
+        setPlans(storage.getPlans(null));
+        setWeekMetas(storage.getWeekMetas(null));
+        setSettings(storage.getSettings(null));
       }
     });
     return () => {
@@ -411,8 +412,8 @@ export default function App() {
     try {
       await signOutUser();
       setUser(null);
-      setPlans(storage.getPlans());
-      setWeekMetas(storage.getWeekMetas());
+      setPlans(storage.getPlans(null));
+      setWeekMetas(storage.getWeekMetas(null));
       toast.info(t('signOut'));
     } catch (e) {
       console.error('Sign out failed', e);
@@ -422,7 +423,7 @@ export default function App() {
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
-    storage.saveSettings(newSettings);
+    storage.saveSettings(newSettings, currentStorageUid);
     if (user) {
       await cloudStorage.saveSettings(user.uid, newSettings).catch(console.error);
     }
@@ -434,7 +435,7 @@ export default function App() {
     if (user) {
       await cloudStorage.saveWeekMeta(user.uid, weekStart, { color }).catch(console.error);
     } else {
-      storage.saveWeekMeta(weekStart, { color });
+      storage.saveWeekMeta(weekStart, { color }, currentStorageUid);
     }
     toast.success('Đã cập nhật trạng thái tuần');
   };
@@ -445,7 +446,7 @@ export default function App() {
     if (user) {
       await cloudStorage.saveWeekMeta(user.uid, weekStart, { note }).catch(console.error);
     } else {
-      storage.saveWeekMeta(weekStart, { note });
+      storage.saveWeekMeta(weekStart, { note }, currentStorageUid);
     }
   };
 
@@ -456,7 +457,7 @@ export default function App() {
     } else {
       const updatedPlans = [...plans, plan];
       setPlans(updatedPlans);
-      storage.savePlans(updatedPlans);
+      storage.savePlans(updatedPlans, currentStorageUid);
     }
     toast.success('Đã thêm công việc');
   };
@@ -467,7 +468,7 @@ export default function App() {
     } else {
       const updated = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
       setPlans(updated);
-      storage.savePlans(updated);
+      storage.savePlans(updated, currentStorageUid);
     }
     toast.success('Đã cập nhật công việc');
   };
@@ -478,7 +479,7 @@ export default function App() {
     } else {
       const updated = plans.filter(p => p.id !== id);
       setPlans(updated);
-      storage.savePlans(updated);
+      storage.savePlans(updated, currentStorageUid);
     }
     toast.info('Đã xóa công việc');
   };

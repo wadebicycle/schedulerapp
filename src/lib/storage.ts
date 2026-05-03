@@ -1,9 +1,5 @@
 import { Plan, AppSettings } from '../types';
 
-const STORAGE_KEY = 'chronos_excel_plans';
-const WEEK_META_KEY = 'chronos_week_meta';
-const SETTINGS_KEY = 'chronos_settings';
-
 const defaultSettings: AppSettings = {
   language: 'en',
   theme: 'light',
@@ -17,54 +13,56 @@ const defaultSettings: AppSettings = {
   endHour: 22,
 };
 
+const keyFor = (key: string, uid?: string | null) => uid ? `${key}_${uid}` : key;
+
 export const storage = {
-  getPlans: (): Plan[] => {
+  getPlans: (uid?: string | null): Plan[] => {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
+      const data = localStorage.getItem(keyFor('chronos_excel_plans', uid));
       return data ? JSON.parse(data) : [];
     } catch (e) {
       console.error('Failed to load plans', e);
       return [];
     }
   },
-  savePlans: (plans: Plan[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+  savePlans: (plans: Plan[], uid?: string | null) => {
+    localStorage.setItem(keyFor('chronos_excel_plans', uid), JSON.stringify(plans));
   },
-  getWeekMetas: (): Record<string, any> => {
+  getWeekMetas: (uid?: string | null): Record<string, any> => {
     try {
-      const data = localStorage.getItem(WEEK_META_KEY);
+      const data = localStorage.getItem(keyFor('chronos_week_meta', uid));
       return data ? JSON.parse(data) : {};
     } catch (e) {
       return {};
     }
   },
-  saveWeekMeta: (weekStart: string, meta: any) => {
-    const metas = storage.getWeekMetas();
+  saveWeekMeta: (weekStart: string, meta: any, uid?: string | null) => {
+    const metas = storage.getWeekMetas(uid);
     metas[weekStart] = { ...metas[weekStart], ...meta };
-    localStorage.setItem(WEEK_META_KEY, JSON.stringify(metas));
+    localStorage.setItem(keyFor('chronos_week_meta', uid), JSON.stringify(metas));
   },
-  getSettings: (): AppSettings => {
+  getSettings: (uid?: string | null): AppSettings => {
     try {
-      const data = localStorage.getItem(SETTINGS_KEY);
+      const data = localStorage.getItem(keyFor('chronos_settings', uid));
       return data ? { ...defaultSettings, ...JSON.parse(data) } : defaultSettings;
     } catch (e) {
       return defaultSettings;
     }
   },
-  saveSettings: (settings: Partial<AppSettings>) => {
-    const current = storage.getSettings();
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...current, ...settings }));
+  saveSettings: (settings: Partial<AppSettings>, uid?: string | null) => {
+    const current = storage.getSettings(uid);
+    localStorage.setItem(keyFor('chronos_settings', uid), JSON.stringify({ ...current, ...settings }));
   },
-  addPlan: (plan: Plan) => {
-    const plans = storage.getPlans();
-    storage.savePlans([...plans, plan]);
+  addPlan: (plan: Plan, uid?: string | null) => {
+    const plans = storage.getPlans(uid);
+    storage.savePlans([...plans, plan], uid);
   },
-  updatePlan: (updatedPlan: Plan) => {
-    const plans = storage.getPlans();
-    storage.savePlans(plans.map(p => p.id === updatedPlan.id ? updatedPlan : p));
+  updatePlan: (updatedPlan: Plan, uid?: string | null) => {
+    const plans = storage.getPlans(uid);
+    storage.savePlans(plans.map(p => p.id === updatedPlan.id ? updatedPlan : p), uid);
   },
-  deletePlan: (id: string) => {
-    const plans = storage.getPlans();
-    storage.savePlans(plans.filter(p => p.id !== id));
+  deletePlan: (id: string, uid?: string | null) => {
+    const plans = storage.getPlans(uid);
+    storage.savePlans(plans.filter(p => p.id !== id), uid);
   }
 };
