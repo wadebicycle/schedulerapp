@@ -24,7 +24,9 @@ import { Plan, AppSettings } from "../types";
 
 const firebaseConfig = {
   apiKey: String(import.meta.env.VITE_FIREBASE_API_KEY || ""),
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "5381fe69-513c-4292-8793-e5e50b6af9a5-00-u8900ybbdbnl.pike.replit.dev",
+  authDomain:
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ||
+    (typeof window !== "undefined" ? window.location.hostname : "5381fe69-513c-4292-8793-e5e50b6af9a5-00-u8900ybbdbnl.pike.replit.dev"),
   projectId: String(import.meta.env.VITE_FIREBASE_PROJECT_ID || ""),
   storageBucket: import.meta.env.VITE_FIREBASE_PROJECT_ID
     ? `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`
