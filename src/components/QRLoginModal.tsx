@@ -24,6 +24,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
   const [sessionId, setSessionId] = React.useState<string>("");
   const [qrUrl, setQrUrl] = React.useState<string>("");
   const [secondsLeft, setSecondsLeft] = React.useState(300);
+  const [scanStatus, setScanStatus] = React.useState<"idle" | "scanned" | "logging-in">("idle");
   const cleanupRef = React.useRef<(() => void) | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -60,6 +61,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         (user) => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("approved");
+          setScanStatus("logging-in");
           setQrUrl("");
           deleteQRSession(id).catch(() => {});
           setTimeout(() => onLoginSuccess(user), 350);
@@ -79,6 +81,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         (user) => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("approved");
+          setScanStatus("logging-in");
           setQrUrl("");
           deleteQRSession(id).catch(() => {});
           setTimeout(() => onLoginSuccess(user), 350);
@@ -176,6 +179,9 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
             )}>
               Mở app trên đt đã đăng nhập → quét QR → xác nhận
             </div>
+            {scanStatus === "logging-in" && (
+              <p className="text-xs font-semibold text-[#107C41]">Đã quét, đang đăng nhập trên máy tính…</p>
+            )}
           </>
         )}
 
