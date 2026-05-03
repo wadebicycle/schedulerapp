@@ -656,12 +656,14 @@ export default function App() {
 
   const completedPlansCount = currentWeekPlans.filter(p => p.color === 'green').length;
   const totalPlansCount = currentWeekPlans.length;
+  const isVietnamese = settings.language === 'vi';
 
 
 
   return (
     <div className={cn(
       "min-h-screen flex flex-col transition-colors duration-300",
+      isVietnamese ? "font-vietnamese" : "font-sans",
       settings.theme === 'dark' ? "bg-slate-950 text-slate-100" : "bg-[#F0F2F5] text-slate-900"
     )}>
       {/* HEADER */}
