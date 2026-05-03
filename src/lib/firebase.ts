@@ -70,7 +70,11 @@ export const signInWithGoogle = async (): Promise<void> => {
   try {
     await signInWithPopup(auth, provider);
   } catch (e: any) {
-    if (e?.code === "auth/popup-blocked" || e?.code === "auth/cancelled-popup-request") {
+    if (
+      e?.code === "auth/popup-blocked" ||
+      e?.code === "auth/cancelled-popup-request" ||
+      e?.code === "auth/popup-closed-by-user"
+    ) {
       await signInWithRedirect(auth, provider);
       return;
     }
