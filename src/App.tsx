@@ -212,6 +212,7 @@ export default function App() {
       if (firebaseUser) {
         setSyncing(true);
         try {
+          const localPlans = storage.getPlans(firebaseUser.uid);
           // Real-time subscription — Firestore is now the source of truth for plans
           let firstSnapshot = true;
           plansUnsubscribeRef.current = subscribePlans(
@@ -229,6 +230,12 @@ export default function App() {
               toast.error(t('syncError'));
             }
           );
+          if (localPlans.length > 0) {
+            const cloudPlans = await cloudStorage.getPlans(firebaseUser.uid);
+            if (cloudPlans.length === 0) {
+              await cloudStorage.savePlans(firebaseUser.uid, localPlans).catch(console.error);
+            }
+          }
           const [cloudWeekMetas, cloudSettings] = await Promise.all([
             cloudStorage.getWeekMetas(firebaseUser.uid),
             cloudStorage.getSettings(firebaseUser.uid),
@@ -475,7 +482,7 @@ export default function App() {
     setPlans(nextPlans);
     storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
-      await cloudStorage.savePlan(user.uid, plan).catch(console.error);
+      await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
     }
     toast.success('Đã thêm công việc');
   };
@@ -485,16 +492,17 @@ export default function App() {
     setPlans(nextPlans);
     storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
-      await cloudStorage.savePlan(user.uid, updatedPlan).catch(console.error);
+      await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
     }
     toast.success('Đã cập nhật công việc');
   };
 
   const handleDeletePlan = async (id: string) => {
+    const nextPlans = plans.filter(p => p.id !== id);
+    setPlans(nextPlans);
+    storage.savePlans(nextPlans, currentStorageUid);
     if (user) {
-      await cloudStorage.deletePlan(user.uid, id).catch(console.error);
-    } else {
-      return;
+      await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
     }
     toast.info('Đã xóa công việc');
   };
