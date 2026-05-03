@@ -707,40 +707,58 @@ export default function App() {
   const handleAddPlan = async (plan: Plan) => {
     const nextPlans = [...plans, plan];
     setPlans(nextPlans);
-    if (user) {
-      await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
-    } else if (qrUser) {
-      await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
-    } else {
-      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+    try {
+      if (user) {
+        await cloudStorage.savePlan(user.uid, plan);
+      } else if (qrUser) {
+        await cloudStorage.savePlan(qrUser.uid, plan);
+      } else {
+        sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+      }
+      toast.success('Đã thêm công việc');
+    } catch (e) {
+      console.error('Failed to save plan', e);
+      toast.error('Lỗi lưu công việc. Hãy thử lại');
+      setPlans(plans);
     }
-    toast.success('Đã thêm công việc');
   };
 
   const handleUpdatePlan = async (updatedPlan: Plan) => {
     const nextPlans = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
     setPlans(nextPlans);
-    if (user) {
-      await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
-    } else if (qrUser) {
-      await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
-    } else {
-      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+    try {
+      if (user) {
+        await cloudStorage.savePlan(user.uid, updatedPlan);
+      } else if (qrUser) {
+        await cloudStorage.savePlan(qrUser.uid, updatedPlan);
+      } else {
+        sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+      }
+      toast.success('Đã cập nhật công việc');
+    } catch (e) {
+      console.error('Failed to update plan', e);
+      toast.error('Lỗi cập nhật công việc. Hãy thử lại');
+      setPlans(plans);
     }
-    toast.success('Đã cập nhật công việc');
   };
 
   const handleDeletePlan = async (id: string) => {
     const nextPlans = plans.filter(p => p.id !== id);
     setPlans(nextPlans);
-    if (user) {
-      await cloudStorage.savePlans(user.uid, nextPlans).catch(console.error);
-    } else if (qrUser) {
-      await cloudStorage.savePlans(qrUser.uid, nextPlans).catch(console.error);
-    } else {
-      sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+    try {
+      if (user) {
+        await cloudStorage.deletePlan(user.uid, id);
+      } else if (qrUser) {
+        await cloudStorage.deletePlan(qrUser.uid, id);
+      } else {
+        sessionStorage.setItem('chronos_excel_plans', JSON.stringify(nextPlans));
+      }
+      toast.info('Đã xóa công việc');
+    } catch (e) {
+      console.error('Failed to delete plan', e);
+      toast.error('Lỗi xóa công việc. Hãy thử lại');
+      setPlans(plans);
     }
-    toast.info('Đã xóa công việc');
   };
 
   const handleUploadCustomMusic = async (file?: File | null) => {
