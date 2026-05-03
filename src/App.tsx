@@ -169,7 +169,7 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
   }, [open, pickTips]);
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col items-end gap-3">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -798,9 +798,6 @@ export default function App() {
                 "text-[9px] font-bold uppercase tracking-widest hidden sm:block",
                 settings.theme === 'dark' ? "text-slate-500" : "text-slate-400"
               )}>Professional Scheduler</p>
-              <div className="hidden sm:block">
-                <HealthTipPanel theme={settings.theme} />
-              </div>
             </div>
           </div>
 
@@ -1038,8 +1035,8 @@ export default function App() {
           )}
           {authError && !effectiveUser && !authLoading ? <div className="mb-4 text-xs text-red-500">Auth lỗi: {authError}</div> : null}
 
-          <div className="flex justify-end mb-3">
-            <div className="w-full max-w-[22rem]">
+          <div className="flex justify-start md:justify-end mb-3">
+            <div className="w-full md:w-auto max-w-none md:max-w-[22rem]">
               <HealthTipPanel theme={settings.theme} />
             </div>
           </div>
@@ -1064,7 +1061,7 @@ export default function App() {
           </div>
 
           {/* Bottom cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Card className={cn("border-none shadow-sm", settings.theme === 'dark' ? "bg-slate-900" : "bg-white")}>
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -1080,7 +1077,7 @@ export default function App() {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-2 border-none shadow-sm bg-[#107C41] text-white">
+            <Card className="col-span-1 md:col-span-2 border-none shadow-sm bg-[#107C41] text-white">
               <CardContent className="p-5 flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-bold mb-1">{t('stayFocused')}</h3>
