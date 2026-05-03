@@ -237,10 +237,11 @@ export default function App() {
           setSyncing(false);
         }
       } else {
-        // Guest: use localStorage
-        setPlans(storage.getPlans(null));
-        setWeekMetas(storage.getWeekMetas(null));
+        // Guest: blank state only
+        setPlans([]);
+        setWeekMetas({});
         setSettings(storage.getSettings(null));
+        setSyncing(false);
       }
     });
     return () => {
@@ -412,8 +413,8 @@ export default function App() {
     try {
       await signOutUser();
       setUser(null);
-      setPlans(storage.getPlans(null));
-      setWeekMetas(storage.getWeekMetas(null));
+      setPlans([]);
+      setWeekMetas({});
       toast.info(t('signOut'));
     } catch (e) {
       console.error('Sign out failed', e);
@@ -435,7 +436,7 @@ export default function App() {
     if (user) {
       await cloudStorage.saveWeekMeta(user.uid, weekStart, { color }).catch(console.error);
     } else {
-      storage.saveWeekMeta(weekStart, { color }, currentStorageUid);
+      return;
     }
     toast.success('Đã cập nhật trạng thái tuần');
   };
@@ -446,7 +447,7 @@ export default function App() {
     if (user) {
       await cloudStorage.saveWeekMeta(user.uid, weekStart, { note }).catch(console.error);
     } else {
-      storage.saveWeekMeta(weekStart, { note }, currentStorageUid);
+      return;
     }
   };
 
@@ -455,9 +456,7 @@ export default function App() {
       // Firestore is source of truth — onSnapshot will update state
       await cloudStorage.savePlan(user.uid, plan).catch(console.error);
     } else {
-      const updatedPlans = [...plans, plan];
-      setPlans(updatedPlans);
-      storage.savePlans(updatedPlans, currentStorageUid);
+      return;
     }
     toast.success('Đã thêm công việc');
   };
@@ -466,9 +465,7 @@ export default function App() {
     if (user) {
       await cloudStorage.savePlan(user.uid, updatedPlan).catch(console.error);
     } else {
-      const updated = plans.map(p => p.id === updatedPlan.id ? updatedPlan : p);
-      setPlans(updated);
-      storage.savePlans(updated, currentStorageUid);
+      return;
     }
     toast.success('Đã cập nhật công việc');
   };
@@ -477,9 +474,7 @@ export default function App() {
     if (user) {
       await cloudStorage.deletePlan(user.uid, id).catch(console.error);
     } else {
-      const updated = plans.filter(p => p.id !== id);
-      setPlans(updated);
-      storage.savePlans(updated, currentStorageUid);
+      return;
     }
     toast.info('Đã xóa công việc');
   };
