@@ -14,7 +14,7 @@ import {
 } from 'date-fns';
 import { Plan, NotificationSound } from './types';
 import { storage } from './lib/storage';
-import { signInWithGoogle, signOutUser, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
+import { signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans } from './lib/firebase';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
 import { User } from 'firebase/auth';
@@ -421,6 +421,19 @@ export default function App() {
     }
   };
 
+  const handleResetAuth = async () => {
+    if (plansUnsubscribeRef.current) {
+      plansUnsubscribeRef.current();
+      plansUnsubscribeRef.current = null;
+    }
+    await clearAuthState();
+    setUser(null);
+    setPlans([]);
+    setWeekMetas({});
+    setAuthStatus('guest');
+    toast.info('Đã reset phiên đăng nhập');
+  };
+
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
@@ -595,6 +608,13 @@ export default function App() {
                   >
                     <LogOut className="w-4 h-4" />
                     {t('signOut')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={cn("gap-2 cursor-pointer text-orange-500 focus:text-orange-500", settings.theme === 'dark' ? "focus:bg-slate-700" : "")}
+                    onClick={handleResetAuth}
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Reset login
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

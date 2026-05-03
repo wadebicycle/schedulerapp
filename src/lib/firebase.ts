@@ -2,10 +2,12 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
+  browserLocalPersistence,
   signInWithPopup,
   signInWithRedirect,
   signOut,
   onAuthStateChanged,
+  setPersistence,
   User,
 } from "firebase/auth";
 import {
@@ -37,6 +39,7 @@ const firebaseConfig = {
 const isFirstInit = getApps().length === 0;
 const app = isFirstInit ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence).catch(() => {});
 
 export const db = isFirstInit
   ? initializeFirestore(app, {
@@ -66,6 +69,10 @@ export const signInWithGoogle = async (): Promise<void> => {
 };
 
 export const signOutUser = () => signOut(auth);
+export const clearAuthState = async () => {
+  await signOut(auth).catch(() => {});
+  await setPersistence(auth, browserLocalPersistence).catch(() => {});
+};
 export const onAuthChanged = (callback: (user: User | null) => void) =>
   onAuthStateChanged(auth, callback);
 
