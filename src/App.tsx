@@ -209,18 +209,6 @@ export default function App() {
       if (firebaseUser) {
         setSyncing(true);
         try {
-          const [cloudPlans, cloudWeekMetas, cloudSettings] = await Promise.all([
-            cloudStorage.getPlans(firebaseUser.uid),
-            cloudStorage.getWeekMetas(firebaseUser.uid),
-            cloudStorage.getSettings(firebaseUser.uid),
-          ]);
-          setPlans(cloudPlans);
-          setWeekMetas(cloudWeekMetas);
-          setSettings({
-            ...storage.getSettings(firebaseUser.uid),
-            ...cloudSettings,
-          } as AppSettings);
-
           // Real-time subscription — Firestore is now the source of truth for plans
           let firstSnapshot = true;
           plansUnsubscribeRef.current = subscribePlans(
@@ -238,6 +226,15 @@ export default function App() {
               toast.error(t('syncError'));
             }
           );
+          const [cloudWeekMetas, cloudSettings] = await Promise.all([
+            cloudStorage.getWeekMetas(firebaseUser.uid),
+            cloudStorage.getSettings(firebaseUser.uid),
+          ]);
+          setWeekMetas(cloudWeekMetas);
+          setSettings({
+            ...storage.getSettings(firebaseUser.uid),
+            ...cloudSettings,
+          } as AppSettings);
         } catch (e) {
           console.error('Cloud sync failed', e);
           toast.error(t('syncError'));
@@ -432,7 +429,9 @@ export default function App() {
   const handleUpdateSettings = async (newSettings: Partial<AppSettings>) => {
     const updated = { ...settings, ...newSettings };
     setSettings(updated);
-    storage.saveSettings(newSettings, currentStorageUid);
+    if (!user) {
+      storage.saveSettings(newSettings, currentStorageUid);
+    }
     if (user) {
       await cloudStorage.saveSettings(user.uid, newSettings).catch(console.error);
     }
