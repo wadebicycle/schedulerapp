@@ -17,6 +17,7 @@ import { storage } from './lib/storage';
 import { auth, signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, cloudStorage, subscribePlans, settleRedirectAuth } from './lib/firebase';
 import { QRLoginModal } from './components/QRLoginModal';
 import { QRConfirmPage } from './components/QRConfirmPage';
+import { QRScanner } from './components/QRScanner';
 import { QRUser, saveQRUserToStorage, loadQRUserFromStorage, clearQRUserFromStorage, isQRSessionUrl } from './lib/qrAuth';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
@@ -149,6 +150,7 @@ export default function App() {
   const [authAccountLabel, setAuthAccountLabel] = React.useState('');
   const [qrUser, setQrUser] = React.useState<QRUser | null>(() => loadQRUserFromStorage());
   const [isQRModalOpen, setIsQRModalOpen] = React.useState(false);
+  const [isQRScannerOpen, setIsQRScannerOpen] = React.useState(false);
   const [qrSessionParam, setQrSessionParam] = React.useState<string | null>(null);
   const customMusicInputRef = React.useRef<HTMLInputElement | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
@@ -711,7 +713,13 @@ export default function App() {
                 "rounded-full w-8 h-8 md:hidden",
                 settings.theme === 'dark' ? "text-slate-300 hover:text-white" : "text-slate-600"
               )}
-              onClick={() => setIsQRModalOpen(true)}
+              onClick={() => {
+                if (effectiveUser) {
+                  setIsQRScannerOpen(true);
+                } else {
+                  setIsQRModalOpen(true);
+                }
+              }}
               title="Quét QR"
             >
               <ScanLine className="w-4 h-4" />
@@ -1553,8 +1561,8 @@ export default function App() {
         onLoginSuccess={handleQRLoginSuccess}
       />
 
-      {/* QR Confirm Page (phone — when ?qrSession= detected in URL) */}
-      {qrSessionParam && (
+      {/* QR Confirm Page (fallback — when ?qrSession= in URL) */}
+      {qrSessionParam && (user || auth.currentUser) && (
         <QRConfirmPage
           sessionId={qrSessionParam}
           user={(user || auth.currentUser) as User}
@@ -1565,6 +1573,15 @@ export default function App() {
             url.searchParams.delete('qrSession');
             window.history.replaceState({}, '', url.toString());
           }}
+        />
+      )}
+
+      {/* QR Scanner (mobile — camera scans desktop QR) */}
+      {isQRScannerOpen && (user || auth.currentUser) && (
+        <QRScanner
+          user={(user || auth.currentUser) as User}
+          theme={settings.theme}
+          onClose={() => setIsQRScannerOpen(false)}
         />
       )}
     </div>
