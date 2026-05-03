@@ -494,6 +494,9 @@ export default function App() {
   const handleQRLoginSuccess = (qrLoginUser: QRUser) => {
     saveQRUserToStorage(qrLoginUser);
     setQrUser(qrLoginUser);
+    setUser(null);
+    setAuthStatus('signed-in');
+    setAuthAccountLabel(qrLoginUser.displayName || qrLoginUser.email || '');
     setIsQRModalOpen(false);
     setAuthError('');
   };
