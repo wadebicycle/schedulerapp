@@ -51,6 +51,7 @@ import {
   X,
   Timer,
   ScanLine,
+  BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -145,7 +146,8 @@ const HEALTH_TIPS = [
   'CT chi tiết hơn X-quang và hay dùng trong cấp cứu, nhưng có liều tia cao hơn.',
 ];
 
-function HealthTipCard({ theme }: { theme: Theme }) {
+function HealthTipPanel({ theme }: { theme: Theme }) {
+  const [open, setOpen] = React.useState(false);
   const [tips, setTips] = React.useState<string[]>([]);
 
   const pickTips = React.useCallback(() => {
@@ -160,43 +162,61 @@ function HealthTipCard({ theme }: { theme: Theme }) {
   }, []);
 
   React.useEffect(() => {
+    if (!open) return;
     pickTips();
     const id = window.setInterval(pickTips, 10000);
     return () => window.clearInterval(id);
-  }, [pickTips]);
+  }, [open, pickTips]);
 
   return (
-    <Card className={cn(
-      "mt-3 overflow-hidden border shadow-sm",
-      theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-    )}>
-      <CardContent className="p-3 space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-              Kiến thức bổ ích
-            </p>
-            <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-              Y tế ngắn gọn, dễ nhớ
-            </p>
-          </div>
-          <Badge variant="secondary" className="text-[10px]">Random</Badge>
-        </div>
-        <div className="space-y-1.5">
-          {tips.map((tip) => (
-            <div
-              key={tip}
-              className={cn(
-                "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-              )}
-            >
-              {tip}
+    <div className="fixed bottom-4 right-4 z-40">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "h-11 px-3 rounded-full shadow-lg flex items-center gap-2 border",
+          theme === 'dark' ? "bg-slate-900 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"
+        )}
+        title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
+      >
+        <BookOpen className="w-4 h-4" />
+        <span className="text-sm font-medium">{open ? '×' : '+'}</span>
+      </button>
+
+      {open && (
+        <Card className={cn(
+          "mt-3 w-[min(92vw,22rem)] overflow-hidden border shadow-xl",
+          theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+        )}>
+          <CardContent className="p-3 space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
+                  Kiến thức bổ ích
+                </p>
+                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
+                  Y tế ngắn gọn, dễ nhớ
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-[10px]">Random</Badge>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            <div className="space-y-1.5">
+              {tips.map((tip) => (
+                <div
+                  key={tip}
+                  className={cn(
+                    "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
+                    theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
+                  )}
+                >
+                  {tip}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
 
@@ -779,7 +799,7 @@ export default function App() {
                 settings.theme === 'dark' ? "text-slate-500" : "text-slate-400"
               )}>Professional Scheduler</p>
               <div className="hidden sm:block">
-                <HealthTipCard theme={settings.theme} />
+                <HealthTipPanel theme={settings.theme} />
               </div>
             </div>
           </div>
