@@ -136,63 +136,6 @@ function WeekNoteEditor({ weekStart, initialNote, theme, placeholder, onSave }: 
   );
 }
 
-const HEALTH_TIPS = [
-  'Tay bẩn thấy rõ thì xà phòng + nước là lựa chọn tốt nhất, vì nó rửa trôi bụi bẩn và vi sinh vật.',
-  'Hand sanitizer hợp nhất khi tay không thấy bẩn và cần sát khuẩn nhanh; nên chọn loại có ít nhất 60% alcohol.',
-  'Cồn 70° sát khuẩn tốt cho da lành vùng nhỏ, nhưng không thay thế hoàn toàn hand sanitizer hằng ngày.',
-  'CT cũng dùng tia X như X-quang, còn MRI không dùng tia X mà dùng từ trường và sóng radio.',
-  'MRI mạnh nhất ở mô mềm như não, tủy sống, dây chằng và cơ.',
-  'X-quang nhanh và rẻ, nhưng ảnh 2D nên dễ bị chồng cấu trúc.',
-  'CT chi tiết hơn X-quang và hay dùng trong cấp cứu, nhưng có liều tia cao hơn.',
-];
-
-function HealthTipCard({ theme }: { theme: Theme }) {
-  const tips = React.useMemo(() => {
-    const first = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
-    let second = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
-    let guard = 0;
-    while (second === first && guard < 5) {
-      second = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
-      guard += 1;
-    }
-    return [first, second];
-  }, []);
-
-  return (
-    <Card className={cn(
-      "mt-4 overflow-hidden border shadow-sm",
-      theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-    )}>
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-              Kiến thức bổ ích
-            </p>
-            <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-              Y tế ngắn gọn, dễ nhớ
-            </p>
-          </div>
-          <Badge variant="secondary" className="text-[10px]">Random</Badge>
-        </div>
-        <div className="space-y-2">
-          {tips.map((tip) => (
-            <div
-              key={tip}
-              className={cn(
-                "rounded-xl px-3 py-2 text-sm leading-relaxed",
-                theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-              )}
-            >
-              {tip}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function App() {
   const [plans, setPlans] = React.useState<Plan[]>([]);
   const [weekMetas, setWeekMetas] = React.useState<Record<string, any>>({});
