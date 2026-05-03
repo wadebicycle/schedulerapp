@@ -431,14 +431,6 @@ export default function App() {
         toast.error('Lỗi mạng. Kiểm tra kết nối internet và thử lại.');
       } else if (e?.code === 'auth/unauthorized-domain') {
         toast.error('Domain chưa được whitelist trong Firebase Authentication.');
-      } else if (
-        e?.code === 'auth/popup-blocked' ||
-        e?.code === 'auth/cancelled-popup-request' ||
-        e?.code === 'auth/popup-closed-by-user'
-      ) {
-        toast.error(`Popup đăng nhập bị chặn: ${code}`);
-      } else if (e?.code === 'auth/user-cancelled') {
-        toast.info('Đăng nhập bị huỷ.');
       } else {
         toast.error(`Đăng nhập thất bại: ${code}`);
       }
