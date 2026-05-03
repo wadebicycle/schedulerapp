@@ -238,6 +238,9 @@ export default function App() {
   const [pomodoroSecondsLeft, setPomodoroSecondsLeft] = React.useState(POMODORO_DURATIONS.work);
   const [pomodoroRunning, setPomodoroRunning] = React.useState(false);
   const [pomodoroSessions, setPomodoroSessions] = React.useState(0);
+  const [pomodoroPos, setPomodoroPos] = React.useState({ x: 16, y: 64 });
+  const pomodoroRef = React.useRef<HTMLDivElement>(null);
+  const pomoDragRef = React.useRef({ isDragging: false, startX: 0, startY: 0, offsetX: 0, offsetY: 0 });
 
   const weekTabsContainerRef = React.useRef<HTMLDivElement>(null);
   const plansUnsubscribeRef = React.useRef<(() => void) | null>(null);
@@ -1303,13 +1306,57 @@ export default function App() {
         const modeColor = pomodoroMode === 'work' ? '#f97316' : pomodoroMode === 'short' ? '#22c55e' : '#8b5cf6';
         const modeBg   = pomodoroMode === 'work' ? 'bg-orange-500' : pomodoroMode === 'short' ? 'bg-green-500' : 'bg-violet-500';
         const modeLabel = pomodoroMode === 'work' ? 'Tập trung' : pomodoroMode === 'short' ? 'Nghỉ ngắn' : 'Nghỉ dài';
+        
+        const handlePomoMouseDown = (e: React.MouseEvent) => {
+          const header = (e.target as HTMLElement).closest('[data-pomo-header]');
+          if (!header) return;
+          pomoDragRef.current = {
+            isDragging: true,
+            startX: e.clientX,
+            startY: e.clientY,
+            offsetX: pomodoroPos.x,
+            offsetY: pomodoroPos.y
+          };
+        };
+        
+        React.useEffect(() => {
+          if (!pomoDragRef.current.isDragging) return;
+          
+          const handleMouseMove = (e: MouseEvent) => {
+            const dx = e.clientX - pomoDragRef.current.startX;
+            const dy = e.clientY - pomoDragRef.current.startY;
+            setPomodoroPos({
+              x: pomoDragRef.current.offsetX + dx,
+              y: pomoDragRef.current.offsetY + dy
+            });
+          };
+          
+          const handleMouseUp = () => {
+            pomoDragRef.current.isDragging = false;
+          };
+          
+          window.addEventListener('mousemove', handleMouseMove);
+          window.addEventListener('mouseup', handleMouseUp);
+          return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+          };
+        }, []);
+        
         return (
-          <div className={cn(
-            "fixed bottom-16 left-4 z-50 w-64 rounded-2xl shadow-2xl border overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200",
-            settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
-          )}>
+          <div 
+            ref={pomodoroRef}
+            className={cn(
+              "fixed z-50 w-64 rounded-2xl shadow-2xl border overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200",
+              settings.theme === 'dark' ? "bg-slate-900 border-slate-700" : "bg-white border-slate-200"
+            )}
+            style={{ left: `${pomodoroPos.x}px`, top: `${pomodoroPos.y}px` }}
+          >
             {/* Header */}
-            <div className={cn("flex items-center justify-between px-4 py-2.5", modeBg)}>
+            <div 
+              data-pomo-header
+              onMouseDown={handlePomoMouseDown}
+              className={cn("flex items-center justify-between px-4 py-2.5 cursor-grab active:cursor-grabbing", modeBg)}>
               <div className="flex items-center gap-2 text-white">
                 <Timer className="w-3.5 h-3.5" />
                 <span className="text-xs font-black uppercase tracking-wide">Pomodoro</span>
