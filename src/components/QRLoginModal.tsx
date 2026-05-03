@@ -40,31 +40,34 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
     setQrUrl(url);
 
     try {
-      createLocalQRSession(id);
-      await createQRSession(id);
-      setPhase("waiting");
-
       timerRef.current = setInterval(() => {
         setSecondsLeft((s) => {
           if (s <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
+            setPhase("expired");
             return 0;
           }
           return s - 1;
         });
       }, 1000);
 
+      createLocalQRSession(id);
+      await createQRSession(id);
+      setPhase("waiting");
+
       cleanupRef.current = watchQRSession(
         id,
         (user) => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("approved");
+          setQrUrl("");
           deleteQRSession(id).catch(() => {});
-          setTimeout(() => onLoginSuccess(user), 800);
+          setTimeout(() => onLoginSuccess(user), 350);
         },
         () => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("expired");
+          setQrUrl("");
           deleteQRSession(id).catch(() => {});
         }
       );
@@ -76,12 +79,14 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
         (user) => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("approved");
+          setQrUrl("");
           deleteQRSession(id).catch(() => {});
-          setTimeout(() => onLoginSuccess(user), 800);
+          setTimeout(() => onLoginSuccess(user), 350);
         },
         () => {
           if (timerRef.current) clearInterval(timerRef.current);
           setPhase("expired");
+          setQrUrl("");
           deleteQRSession(id).catch(() => {});
         }
       );
@@ -139,7 +144,7 @@ export function QRLoginModal({ open, theme, onClose, onLoginSuccess }: Props) {
           </div>
         )}
 
-        {phase === "waiting" && qrUrl && (
+        {(phase === "waiting" || phase === "generating") && qrUrl && (
           <>
             <div className={cn(
               "p-4 rounded-xl border-2",
