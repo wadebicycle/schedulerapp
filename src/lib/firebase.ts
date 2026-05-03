@@ -5,7 +5,6 @@ import {
   browserLocalPersistence,
   signInWithPopup,
   signInWithRedirect,
-  getRedirectResult,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -82,9 +81,6 @@ export const signInWithGoogle = async (): Promise<void> => {
     throw e;
   }
 };
-
-export const resolveRedirectResult = () =>
-  getRedirectResult(auth);
 
 export const signOutUser = () => signOut(auth);
 export const clearAuthState = async () => {
