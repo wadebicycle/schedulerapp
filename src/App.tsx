@@ -172,7 +172,7 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
 
   return (
     <div className="w-full flex justify-end">
-      <div className="relative w-full max-w-[22rem] md:max-w-[28rem]">
+      <div className="relative w-full max-w-[22rem] md:max-w-none md:w-fit">
         <div className="flex items-center justify-end mb-2 md:mb-0 md:w-fit">
           <button
             type="button"
@@ -192,11 +192,11 @@ function HealthTipPanel({ theme }: { theme: Theme }) {
         </div>
 
         <div className={cn(
-          "md:absolute md:right-0 md:top-0 md:translate-x-full md:ml-4 md:z-30 transition-all duration-200 origin-top-right",
+          "absolute left-0 top-14 z-30 transition-all duration-200 origin-top-right",
           open ? "scale-100 opacity-100 pointer-events-auto" : "scale-95 opacity-0 pointer-events-none"
         )}>
           <Card className={cn(
-            "w-full md:w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden border shadow-xl",
+            "w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden border shadow-xl",
             theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
           )}>
             <CardContent className="p-3 space-y-2">
