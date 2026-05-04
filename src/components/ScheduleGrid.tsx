@@ -265,7 +265,7 @@ export function ScheduleGrid({
                         </button>
                       </div>
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center opacity-0 group-hover:opacity-20 transition-opacity">
+                      <div className="w-full h-full flex items-center justify-center opacity-10 group-hover:opacity-20 transition-opacity">
                         <Plus className="w-4 md:w-5 h-4 md:h-5 text-slate-400" />
                       </div>
                     )}

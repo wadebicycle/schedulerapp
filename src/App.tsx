@@ -294,6 +294,7 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
           theme === 'dark' ? "bg-slate-800 text-white border-slate-700 hover:bg-slate-700" : "bg-slate-50 text-slate-900 border-slate-200 hover:bg-white"
         )}
         title={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
+        aria-label={open ? "Ẩn kiến thức" : "Hiện kiến thức"}
       >
         <BookOpen className="w-4 h-4" />
         <span className="text-xs font-medium">{open ? '×' : '+'}</span>
