@@ -75,6 +75,8 @@ export function QRScanner({ user, theme, onClose }: Props) {
           videoRef.current.srcObject = stream;
           videoRef.current.play().then(() => {
             rafRef.current = requestAnimationFrame(scanLoop);
+          }).catch(() => {
+            if (mounted) setPhase("no-camera");
           });
         }
       })
@@ -132,7 +134,7 @@ export function QRScanner({ user, theme, onClose }: Props) {
           <canvas ref={canvasRef} className="hidden" />
           {/* Viewfinder */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-64 h-64 relative">
+            <div className="w-48 h-48 sm:w-64 sm:h-64 relative">
               <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-[#107C41] rounded-tl-md" />
               <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-[#107C41] rounded-tr-md" />
               <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-[#107C41] rounded-bl-md" />
