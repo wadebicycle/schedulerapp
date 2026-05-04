@@ -47,16 +47,77 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
 }) {
+  const [position, setPosition] = React.useState<{ x: number; y: number } | null>(null)
+  const [dragState, setDragState] = React.useState<{
+    pointerX: number
+    pointerY: number
+    initialX: number
+    initialY: number
+  } | null>(null)
+
+  const { open, ...popupProps } = props as DialogPrimitive.Popup.Props & { open?: boolean }
+
+  React.useEffect(() => {
+    if (open && position === null && typeof window !== "undefined") {
+      setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
+    }
+  }, [open, position])
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const dragHandle = (event.target as HTMLElement).closest("[data-drag-handle]")
+    if (!dragHandle) {
+      return
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setDragState({
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      initialX: position?.x ?? rect.left + rect.width / 2,
+      initialY: position?.y ?? rect.top + rect.height / 2,
+    })
+  }
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragState) {
+      return
+    }
+
+    const deltaX = event.clientX - dragState.pointerX
+    const deltaY = event.clientY - dragState.pointerY
+    setPosition({
+      x: dragState.initialX + deltaX,
+      y: dragState.initialY + deltaY,
+    })
+  }
+
+  const handlePointerUp = () => {
+    setDragState(null)
+  }
+
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        style={
+          position
+            ? {
+                left: position.x,
+                top: position.y,
+                transform: "translate(-50%, -50%)",
+              }
+            : undefined
+        }
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed left-1/2 top-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl bg-popover p-4 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
-        {...props}
+        {...popupProps}
       >
         {children}
         {showCloseButton && (
@@ -70,8 +131,7 @@ function DialogContent({
               />
             }
           >
-            <XIcon
-            />
+            <XIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
@@ -84,7 +144,8 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2", className)}
+      data-drag-handle="true"
+      className={cn("flex flex-col gap-2 cursor-grab select-none", className)}
       {...props}
     />
   )
