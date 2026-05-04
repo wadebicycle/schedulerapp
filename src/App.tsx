@@ -713,10 +713,16 @@ export default function App() {
         toast.error(e.message);
         return;
       }
-      if (e?.code === 'auth/network-request-failed') {
+      if (code === 'auth/network-request-failed') {
         toast.error('Lỗi mạng. Kiểm tra kết nối internet và thử lại.');
-      } else if (e?.code === 'auth/unauthorized-domain') {
+      } else if (code === 'auth/unauthorized-domain') {
         toast.error('Domain chưa được whitelist trong Firebase Authentication.');
+      } else if (code === 'auth/popup-blocked') {
+        toast.error('Popup đăng nhập bị chặn. Vui lòng cho phép popup và thử lại.');
+      } else if (code === 'auth/popup-closed-by-user') {
+        toast.error('Đã hủy đăng nhập.');
+      } else if (code === 'auth/cancelled-popup-request') {
+        toast.error('Đăng nhập đã bị hủy.');
       } else {
         toast.error(`Đăng nhập thất bại: ${code}`);
       }

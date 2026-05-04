@@ -46,10 +46,19 @@ provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = async (): Promise<void> => {
   try {
+    // Try popup first, fallback to redirect if popup fails
     await signInWithPopup(auth, provider);
-  } catch (error) {
-    const code = (error as { code?: string })?.code;
+  } catch (error: any) {
+    const code = error?.code;
     console.error("Popup auth failed", code, error);
+    
+    // If popup blocked or not supported, try redirect
+    if (code === 'auth/popup-blocked' || code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      console.log("Popup blocked, trying redirect...");
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+    
     throw error;
   }
 };
