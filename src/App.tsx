@@ -21,6 +21,7 @@ import { QRScanner } from './components/QRScanner';
 import { QRUser, saveQRUserToStorage, loadQRUserFromStorage, clearQRUserFromStorage, isQRSessionUrl } from './lib/qrAuth';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
+import { healthTipsManager } from './lib/healthTips';
 import { User } from 'firebase/auth';
 import { ScheduleGrid } from './components/ScheduleGrid';
 import { Toaster } from '@/components/ui/sonner';
@@ -156,17 +157,70 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
     initialX: number;
     initialY: number;
   } | null>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [allTips, setAllTips] = React.useState<string[]>([]);
+  const [tipsLoaded, setTipsLoaded] = React.useState(false);
+  const autoUpdateRef = React.useRef<NodeJS.Timeout | null>(null);
   const buttonRef = React.useRef<HTMLButtonElement | null>(null);
 
-  const pickTip = React.useCallback(() => {
-    setTip(HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)]);
+  // Initialize tips on component mount
+  React.useEffect(() => {
+    const tips = healthTipsManager.getAllTips();
+    setAllTips(tips);
+    setTipsLoaded(true);
   }, []);
 
+  const pickTip = React.useCallback(() => {
+    if (allTips.length > 0) {
+      setTip(allTips[Math.floor(Math.random() * allTips.length)]);
+    }
+  }, [allTips]);
+
+  // Auto-fetch new tips when panel opens (if online)
   React.useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      if (autoUpdateRef.current) {
+        clearInterval(autoUpdateRef.current);
+        autoUpdateRef.current = null;
+      }
+      return;
+    }
+
     pickTip();
-    const id = window.setInterval(pickTip, 10000);
-    return () => window.clearInterval(id);
+
+    // Auto-fetch new tips and change tip every 10 seconds
+    const autoUpdate = async () => {
+      // Fetch new tips every 2 minutes if online
+      if (navigator.onLine) {
+        try {
+          setIsLoading(true);
+          await healthTipsManager.addExternalTips(3);
+          const tips = healthTipsManager.getAllTips();
+          setAllTips(tips);
+        } catch (error) {
+          console.error('Auto-fetch tips failed:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    // Change tip every 10 seconds
+    const tipInterval = window.setInterval(pickTip, 10000);
+    
+    // Fetch new tips every 2 minutes
+    const updateInterval = window.setInterval(autoUpdate, 2 * 60 * 1000);
+    
+    // Initial fetch after 5 seconds
+    const initialFetch = window.setTimeout(autoUpdate, 5000);
+
+    autoUpdateRef.current = updateInterval as any;
+
+    return () => {
+      window.clearInterval(tipInterval);
+      window.clearInterval(updateInterval);
+      window.clearTimeout(initialFetch);
+    };
   }, [open, pickTip]);
 
   // Auto-close when settings open
