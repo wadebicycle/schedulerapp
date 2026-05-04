@@ -90,8 +90,8 @@ export const healthTipsManager = {
   },
 
   /**
-   * Get tips from external sources (simulated with local data)
-   * In production, this would fetch from real APIs like WHO, CDC, Mayo Clinic, etc.
+   * Get tips from external sources (now fetches from real API)
+   * In production, this fetches from WHO API for health indicators
    */
   fetchExternalTips: async (limit: number = 5): Promise<string[]> => {
     // Check if online
@@ -99,17 +99,28 @@ export const healthTipsManager = {
       throw new Error('No internet connection');
     }
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      // Fetch from WHO API (free, no key required)
+      const response = await fetch('https://ghoapi.azureedge.net/api/Indicator?$select=IndicatorName&$top=10');
+      if (!response.ok) throw new Error('API fetch failed');
 
-    const stored = healthTipsManager.getStoredTips();
-    const allExternalTips = EXTERNAL_HEALTH_TIPS.filter(
-      tip => ![...stored.default, ...stored.custom].includes(tip)
-    );
+      const data = await response.json();
+      // Parse data: create tips from indicator names
+      const tips = data.value.map((item: any) => `Theo WHO: ${item.IndicatorName} là chỉ số sức khỏe quan trọng.`);
 
-    // Return random tips from external sources
-    const shuffled = [...allExternalTips].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, limit);
+      const stored = healthTipsManager.getStoredTips();
+      const newTips = tips.filter((tip: string) => ![...stored.default, ...stored.custom].includes(tip));
+      return newTips.slice(0, limit);
+    } catch (error) {
+      console.error('Failed to fetch from API, using local data:', error);
+      // Fallback to local
+      const stored = healthTipsManager.getStoredTips();
+      const allExternalTips = EXTERNAL_HEALTH_TIPS.filter(
+        tip => ![...stored.default, ...stored.custom].includes(tip)
+      );
+      const shuffled = [...allExternalTips].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, limit);
+    }
   },
 
   /**
