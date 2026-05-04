@@ -347,8 +347,10 @@ export default function App() {
   const currentPlansRef = React.useRef<Plan[]>([]);
   const currentUserRef = React.useRef<User | null>(null);
   const currentQRUserRef = React.useRef<QRUser | null>(null);
+  const motivationTimeoutRef = React.useRef<number | null>(null);
 
   const [settings, setSettings] = React.useState<AppSettings>(() => storage.getSettings());
+  const [motivationMessage, setMotivationMessage] = React.useState<string | null>(null);
   const t = (key: keyof typeof translations.en, params: Record<string, string> = {}) => {
     let text = translations[settings.language][key];
     Object.entries(params).forEach(([k, v]) => {
@@ -677,12 +679,18 @@ export default function App() {
     return () => clearInterval(interval);
   }, [settings.notificationsEnabled, settings.notificationSound, plans]);
 
-  // Handle plan turned green — show motivational message
+  // Handle plan turned green — show motivational overlay
   const handlePlanTurnGreen = React.useCallback((plan: Plan) => {
-    const msgs = MOTIVATIONAL;
-    const msg = t(msgs[Math.floor(Math.random() * msgs.length)]);
-    toast.success(`🌟 ${msg}`, { duration: 4000 });
-  }, [settings.language]);
+    const message = 'Tuyệt vời! Bạn làm tốt lắm! Tiếp tục mục tiêu nhé!';
+    setMotivationMessage(message);
+    if (motivationTimeoutRef.current) {
+      window.clearTimeout(motivationTimeoutRef.current);
+    }
+    motivationTimeoutRef.current = window.setTimeout(() => {
+      setMotivationMessage(null);
+      motivationTimeoutRef.current = null;
+    }, 3000);
+  }, []);
 
   const handleSignIn = async () => {
     if (!isOnline) {
