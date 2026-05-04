@@ -129,7 +129,7 @@ export function QRScanner({ user, theme, onClose }: Props) {
             ref={videoRef}
             muted
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover bg-black"
           />
           <canvas ref={canvasRef} className="hidden" />
           {/* Viewfinder */}
