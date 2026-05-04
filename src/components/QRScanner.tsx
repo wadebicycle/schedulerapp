@@ -137,7 +137,7 @@ export function QRScanner({ user, theme, onClose }: Props) {
               <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-[#107C41] rounded-tr-md" />
               <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-[#107C41] rounded-bl-md" />
               <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-[#107C41] rounded-br-md" />
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-[#107C41]/70 animate-scan-line" />
+              <div className="absolute left-4 right-4 top-0 h-0.5 bg-[#107C41]/70 animate-scan-line" />
             </div>
           </div>
           <p className="absolute bottom-8 left-0 right-0 text-center text-white/70 text-xs px-8">
