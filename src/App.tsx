@@ -1150,22 +1150,6 @@ export default function App() {
             </div>
             {/* Right-side controls */}
             <div className="flex items-center gap-3 shrink-0">
-              {completedPlansCount > 0 && (
-                <div className={cn(
-                  "p-3 rounded-xl border shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-right-4",
-                  settings.theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-                )}>
-                  <div className="bg-yellow-500/10 p-2 rounded-full">
-                    <Trophy className="w-4 h-4 text-yellow-500" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('weeklyProgress')}</p>
-                    <p className={cn("text-sm font-medium", settings.theme === 'dark' ? "text-slate-200" : "text-slate-900")}>
-                      {completedPlansCount} {t('tasksCompleted')}
-                    </p>
-                  </div>
-                </div>
-              )}
               <HealthTipPanel theme={settings.theme} isSettingsOpen={isSettingsOpen} />
               {/* Pomodoro toggle button */}
               <button
@@ -1251,8 +1235,18 @@ export default function App() {
           </div>
 
           {/* Bottom cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Card className={cn("border-none shadow-sm", settings.theme === 'dark' ? "bg-slate-900" : "bg-white")}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="col-span-1 md:col-span-2 border-none shadow-sm bg-[#107C41] text-white">
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold mb-1">{t('stayFocused')}</h3>
+                  <p className="text-white/70 text-sm">{t('planStepByStep')}</p>
+                </div>
+                <CheckCircle2 className="w-10 h-10 text-white/20 shrink-0" />
+              </CardContent>
+            </Card>
+
+            <Card className={cn("border-none shadow-sm md:col-start-2 justify-self-end", settings.theme === 'dark' ? "bg-slate-900" : "bg-white")}>
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className={cn("font-bold text-sm", settings.theme === 'dark' ? "text-slate-300" : "text-slate-700")}>{t('weeklyProgress')}</h3>
@@ -1264,16 +1258,6 @@ export default function App() {
                     style={{ width: `${totalPlansCount > 0 ? (completedPlansCount / totalPlansCount) * 100 : 0}%` }}
                   />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="col-span-1 md:col-span-2 border-none shadow-sm bg-[#107C41] text-white">
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-bold mb-1">{t('stayFocused')}</h3>
-                  <p className="text-white/70 text-sm">{t('planStepByStep')}</p>
-                </div>
-                <CheckCircle2 className="w-10 h-10 text-white/20 shrink-0" />
               </CardContent>
             </Card>
           </div>
