@@ -18,7 +18,6 @@ import { auth, signInWithGoogle, signOutUser, clearAuthState, onAuthChanged, clo
 import { QRLoginModal } from './components/QRLoginModal';
 import { QRConfirmPage } from './components/QRConfirmPage';
 import { QRScanner } from './components/QRScanner';
-import { UpdatePrompt } from './components/UpdatePrompt';
 import { QRUser, saveQRUserToStorage, loadQRUserFromStorage, clearQRUserFromStorage, isQRSessionUrl } from './lib/qrAuth';
 import { PRESET_TRACKS } from './lib/musicTracks';
 import { playNotificationSound } from './lib/sounds';
@@ -1915,8 +1914,6 @@ export default function App() {
           onClose={() => setIsQRScannerOpen(false)}
         />
       )}
-
-      <UpdatePrompt />
     </div>
   );
 }
