@@ -295,7 +295,12 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
             <div className="p-3 space-y-2">
               <div>
                 <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>Kiến thức bổ ích</p>
-                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>Y tế ngắn gọn, dễ nhớ</p>
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>Y tế ngắn gọn, dễ nhớ</p>
+                  <span className={cn("text-xs px-2 py-1 rounded-full", theme === 'dark' ? "bg-slate-800 text-slate-300" : "bg-slate-100 text-slate-700")}>
+                    {allTips.length}
+                  </span>
+                </div>
               </div>
               {tip && (
                 <div className={cn(
@@ -303,6 +308,23 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
                   theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
                 )}>
                   {tip}
+                </div>
+              )}
+              {isLoading && (
+                <div className={cn(
+                  "text-xs px-2 py-1.5 rounded text-center flex items-center justify-center gap-2",
+                  theme === 'dark' ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-600"
+                )}>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <span>Đang cập nhật...</span>
+                </div>
+              )}
+              {!navigator.onLine && (
+                <div className={cn(
+                  "text-xs px-2 py-1.5 rounded text-center",
+                  theme === 'dark' ? "bg-slate-800 text-amber-300" : "bg-amber-50 text-amber-700"
+                )}>
+                  ⚠️ Cập nhật khi online
                 </div>
               )}
             </div>
