@@ -149,6 +149,14 @@ const HEALTH_TIPS = [
 function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpen: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [tip, setTip] = React.useState('');
+  const [position, setPosition] = React.useState<{ x: number; y: number } | null>(null);
+  const [dragState, setDragState] = React.useState<{
+    pointerX: number;
+    pointerY: number;
+    initialX: number;
+    initialY: number;
+  } | null>(null);
+  const buttonRef = React.useRef<HTMLButtonElement | null>(null);
 
   const pickTip = React.useCallback(() => {
     setTip(HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)]);
@@ -166,9 +174,45 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
     if (isSettingsOpen) setOpen(false);
   }, [isSettingsOpen]);
 
+  React.useEffect(() => {
+    if (!open || position !== null || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setPosition({
+      x: rect.left + rect.width / 2,
+      y: Math.max(82, rect.top + window.scrollY - 20),
+    });
+  }, [open, position]);
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!(event.target as HTMLElement).closest('[data-drag-handle]')) return;
+    if (!position) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDragState({
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      initialX: position.x,
+      initialY: position.y,
+    });
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragState) return;
+    const deltaX = event.clientX - dragState.pointerX;
+    const deltaY = event.clientY - dragState.pointerY;
+    setPosition({
+      x: dragState.initialX + deltaX,
+      y: Math.max(12, dragState.initialY + deltaY),
+    });
+  };
+
+  const handlePointerUp = () => {
+    setDragState(null);
+  };
+
   return (
     <div className="relative hidden md:flex items-center">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
@@ -181,28 +225,59 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
         <span className="text-xs font-medium">{open ? '×' : '+'}</span>
       </button>
 
-      {open && (
-        <Card className={cn(
-          "absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-[20rem] border shadow-xl z-50",
-          theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-        )}>
-          <CardContent className="p-3 space-y-2">
-            <div>
-              <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>
-                Kiến thức bổ ích
-              </p>
-              <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>
-                Y tế ngắn gọn, dễ nhớ
-              </p>
-            </div>
-            {tip && (
-              <div className={cn(
-                "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
-                theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
-              )}>
-                {tip}
+      {open && position && (
+        <Card
+          className={cn(
+            "fixed z-50 w-[20rem] border shadow-xl",
+            theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
+          )}
+          style={{
+            left: position.x,
+            top: position.y,
+            transform: 'translate(-50%, -100%)',
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
+          <CardContent className="p-0">
+            <div
+              data-drag-handle
+              className={cn(
+                "flex items-center justify-between gap-2 px-3 py-2 cursor-grab select-none",
+                theme === 'dark' ? "bg-slate-800 text-white" : "bg-slate-50 text-slate-900"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-[0.25em]">Kiến thức</span>
               </div>
-            )}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "rounded-full p-1 transition-colors",
+                  theme === 'dark' ? "hover:bg-slate-700" : "hover:bg-slate-100"
+                )}
+                aria-label="Đóng"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="p-3 space-y-2">
+              <div>
+                <p className={cn("text-[10px] font-black uppercase tracking-[0.25em]", theme === 'dark' ? "text-emerald-400" : "text-[#107C41]")}>Kiến thức bổ ích</p>
+                <p className={cn("text-sm font-bold", theme === 'dark' ? "text-white" : "text-slate-900")}>Y tế ngắn gọn, dễ nhớ</p>
+              </div>
+              {tip && (
+                <div className={cn(
+                  "rounded-lg px-3 py-2 text-[12px] leading-relaxed",
+                  theme === 'dark' ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-slate-700"
+                )}>
+                  {tip}
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
