@@ -183,29 +183,48 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
     });
   }, [open, position]);
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!(event.target as HTMLElement).closest('[data-drag-handle]')) return;
+  const startDrag = (clientX: number, clientY: number) => {
     if (!position) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
     setDragState({
-      pointerX: event.clientX,
-      pointerY: event.clientY,
+      pointerX: clientX,
+      pointerY: clientY,
       initialX: position.x,
       initialY: position.y,
     });
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!(event.target as HTMLElement).closest('[data-drag-handle]')) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    startDrag(event.clientX, event.clientY);
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (!(event.target as HTMLElement).closest('[data-drag-handle]')) return;
+    const touch = event.touches[0];
+    startDrag(touch.clientX, touch.clientY);
+  };
+
+  const handleMove = (clientX: number, clientY: number) => {
     if (!dragState) return;
-    const deltaX = event.clientX - dragState.pointerX;
-    const deltaY = event.clientY - dragState.pointerY;
+    const deltaX = clientX - dragState.pointerX;
+    const deltaY = clientY - dragState.pointerY;
     setPosition({
       x: dragState.initialX + deltaX,
       y: Math.max(12, dragState.initialY + deltaY),
     });
   };
 
-  const handlePointerUp = () => {
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    handleMove(event.clientX, event.clientY);
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length === 0) return;
+    handleMove(event.touches[0].clientX, event.touches[0].clientY);
+  };
+
+  const handleDragEnd = () => {
     setDragState(null);
   };
 
@@ -228,7 +247,7 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
       {open && (
         <Card
           className={cn(
-            "fixed z-50 w-[20rem] border shadow-xl",
+            "fixed z-50 w-[20rem] border shadow-xl touch-none",
             theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
           )}
           style={{
@@ -238,16 +257,21 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
           }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
+          onPointerUp={handleDragEnd}
+          onPointerCancel={handleDragEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleDragEnd}
+          onTouchCancel={handleDragEnd}
         >
           <CardContent className="p-0">
             <div
               data-drag-handle
               className={cn(
-                "flex items-center justify-between gap-2 px-3 py-2 cursor-grab select-none",
+                "flex items-center justify-between gap-2 px-3 py-2 cursor-grab select-none touch-none",
                 theme === 'dark' ? "bg-slate-800 text-white" : "bg-slate-50 text-slate-900"
               )}
+              style={{ touchAction: 'none' }}
             >
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
