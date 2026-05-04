@@ -210,7 +210,7 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
   };
 
   return (
-    <div className="relative hidden md:flex items-center">
+    <div className="relative flex items-center">
       <button
         ref={buttonRef}
         type="button"
@@ -225,20 +225,21 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
         <span className="text-xs font-medium">{open ? '×' : '+'}</span>
       </button>
 
-      {open && position && (
+      {open && (
         <Card
           className={cn(
             "fixed z-50 w-[20rem] border shadow-xl",
             theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
           )}
           style={{
-            left: position.x,
-            top: position.y,
-            transform: 'translate(-50%, -100%)',
+            left: position?.x ?? '50%',
+            top: position?.y ?? 90,
+            transform: position ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
           }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
           <CardContent className="p-0">
             <div
