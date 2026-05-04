@@ -40,18 +40,14 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
+    
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    // Đã lược bỏ phần host/port cứng của Replit để tương thích tốt nhất với Vercel
     server: {
-      host: '0.0.0.0',
-      port: 5000,
-      allowedHosts: true,
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };
