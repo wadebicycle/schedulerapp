@@ -59,7 +59,6 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { translations } from './lib/i18n';
 import { AppSettings, Language, Theme } from './types';
-import { UpdatePrompt } from './components/UpdatePrompt';
 
 import { 
   Dialog,
@@ -177,9 +176,10 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
   React.useEffect(() => {
     if (!open || position !== null || !buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
+    // Position the card below and to the right of the button
     setPosition({
-      x: rect.left + rect.width / 2,
-      y: Math.max(82, rect.top + window.scrollY - 20),
+      x: rect.right - 320,
+      y: rect.bottom + 12,
     });
   }, [open, position]);
 
@@ -211,7 +211,7 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
     const deltaY = clientY - dragState.pointerY;
     setPosition({
       x: dragState.initialX + deltaX,
-      y: Math.max(12, dragState.initialY + deltaY),
+      y: dragState.initialY + deltaY,
     });
   };
 
@@ -229,7 +229,7 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
   };
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative inline-block">
       <button
         ref={buttonRef}
         type="button"
@@ -247,13 +247,14 @@ function HealthTipPanel({ theme, isSettingsOpen }: { theme: Theme; isSettingsOpe
       {open && (
         <Card
           className={cn(
-            "fixed z-50 w-[20rem] border shadow-xl touch-none",
+            "fixed z-40 w-[20rem] border shadow-xl touch-none",
             theme === 'dark' ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
           )}
           style={{
-            left: position?.x ?? '50%',
-            top: position?.y ?? 90,
-            transform: position ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
+            left: position?.x ?? 'auto',
+            top: position?.y ?? 'auto',
+            right: !position ? '1rem' : 'auto',
+            bottom: !position ? '1rem' : 'auto',
           }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -1373,7 +1374,6 @@ export default function App() {
       </footer>
 
       <Toaster position="bottom-right" />
-      <UpdatePrompt />
 
       {/* POMODORO FLOATING PANEL */}
       {isPomodoroOpen && (() => {
